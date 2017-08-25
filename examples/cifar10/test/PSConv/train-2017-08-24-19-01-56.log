@@ -1,0 +1,39 @@
+I0824 19:01:56.560464  6676 caffe.cpp:218] Using GPUs 0
+I0824 19:01:56.565160  6676 caffe.cpp:223] GPU 0: GeForce GTX 1080
+I0824 19:01:57.852978  6676 solver.cpp:44] Initializing solver from parameters: 
+test_iter: 100
+test_interval: 1000
+base_lr: 0.001
+display: 200
+max_iter: 40000
+lr_policy: "step"
+gamma: 0.0001
+momentum: 0.9
+weight_decay: 0.004
+stepsize: 10000
+snapshot: 10000
+snapshot_prefix: "examples/cifar10/PSConv_cifar10_quick"
+solver_mode: GPU
+device_id: 0
+net: "examples/cifar10/PSConv_cifar10_quick_train_test.prototxt"
+train_state {
+  level: 0
+  stage: ""
+}
+F0824 19:01:57.853121  6676 solver.cpp:431] Cannot write to snapshot prefix 'examples/cifar10/PSConv_cifar10_quick'.  Make sure that the directory exists and is writeable.
+*** Check failure stack trace: ***
+    @     0x7f185ff095cd  google::LogMessage::Fail()
+    @     0x7f185ff0b433  google::LogMessage::SendToLog()
+    @     0x7f185ff0915b  google::LogMessage::Flush()
+    @     0x7f185ff0be1e  google::LogMessageFatal::~LogMessageFatal()
+    @     0x7f18607035cf  caffe::Solver<>::CheckSnapshotWritePermissions()
+    @     0x7f1860700515  caffe::Solver<>::Init()
+    @     0x7f1860700061  caffe::Solver<>::Solver()
+    @     0x7f186074acae  caffe::SGDSolver<>::SGDSolver()
+    @     0x7f18607573d9  caffe::Creator_SGDSolver<>()
+    @           0x4218f2  caffe::SolverRegistry<>::CreateSolver()
+    @           0x41c991  train()
+    @           0x41ef31  main
+    @     0x7f185e696830  __libc_start_main
+    @           0x41b4b9  _start
+    @              (nil)  (unknown)

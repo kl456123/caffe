@@ -1,0 +1,195 @@
+I0824 19:03:50.708122  6912 caffe.cpp:218] Using GPUs 0
+I0824 19:03:50.711747  6912 caffe.cpp:223] GPU 0: GeForce GTX 1080
+I0824 19:03:52.014138  6912 solver.cpp:44] Initializing solver from parameters: 
+test_iter: 100
+test_interval: 1000
+base_lr: 0.001
+display: 200
+max_iter: 40000
+lr_policy: "step"
+gamma: 0.0001
+momentum: 0.9
+weight_decay: 0.004
+stepsize: 10000
+snapshot: 10000
+snapshot_prefix: "PSConv/PSConv_cifar10_quick"
+solver_mode: GPU
+device_id: 0
+net: "PSConv_cifar10_quick_train_test.prototxt"
+train_state {
+  level: 0
+  stage: ""
+}
+I0824 19:03:52.014334  6912 solver.cpp:87] Creating training net from net file: PSConv_cifar10_quick_train_test.prototxt
+I0824 19:03:52.014650  6912 net.cpp:294] The NetState phase (0) differed from the phase (1) specified by a rule in layer cifar
+I0824 19:03:52.014665  6912 net.cpp:294] The NetState phase (0) differed from the phase (1) specified by a rule in layer accuracy
+I0824 19:03:52.014730  6912 net.cpp:51] Initializing net from parameters: 
+name: "PSConv_CIFAR10"
+state {
+  phase: TRAIN
+  level: 0
+  stage: ""
+}
+layer {
+  name: "cifar"
+  type: "Data"
+  top: "data"
+  top: "label"
+  include {
+    phase: TRAIN
+  }
+  transform_param {
+    mean_file: "examples/cifar10/mean.binaryproto"
+  }
+  data_param {
+    source: "examples/cifar10/cifar10_train_lmdb"
+    batch_size: 100
+    backend: LMDB
+  }
+}
+layer {
+  name: "conv1"
+  type: "Convolution"
+  bottom: "data"
+  top: "conv1"
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 90
+    pad: 1
+    kernel_size: 3
+    stride: 1
+  }
+}
+layer {
+  name: "relu1"
+  type: "ReLU"
+  bottom: "conv1"
+  top: "conv1"
+}
+layer {
+  name: "conv2"
+  type: "Convolution"
+  bottom: "conv1"
+  top: "conv2"
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 90
+    pad: 1
+    kernel_size: 3
+    stride: 1
+    engine: CAFFE
+    dilation: 2
+    ps_group: 9
+    position_sensetive: true
+  }
+}
+layer {
+  name: "bn2"
+  type: "BatchNorm"
+  bottom: "conv2"
+  top: "conv2"
+}
+layer {
+  name: "scale2"
+  type: "Scale"
+  bottom: "conv2"
+  top: "conv2"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "relu2"
+  type: "ReLU"
+  bottom: "conv2"
+  top: "conv2"
+}
+layer {
+  name: "conv3"
+  type: "Convolution"
+  bottom: "conv2"
+  top: "conv3"
+  convolution_param {
+    num_output: 360
+    pad: 1
+    kernel_size: 3
+    stride: 1
+    engine: CAFFE
+    ps_group: 9
+    position_sensetive: true
+  }
+}
+layer {
+  name: "relu3"
+  type: "ReLU"
+  bottom: "conv3"
+  top: "conv3"
+}
+layer {
+  name: "conv4"
+  type: "Convolution"
+  bottom: "conv3"
+  top: "conv4"
+  convolution_param {
+    num_output: 10
+    pad: 1
+    kernel_size: 3
+    stride: 1
+    engine: CAFFE
+    dilation: 2
+    ps_group: 9
+    position_sensetive: true
+  }
+}
+layer {
+  name: "pool"
+  type: "Pooling"
+  bottom: "conv4"
+  top: "pool"
+  pooling_param {
+    pool: AVE
+    global_pooling: true
+  }
+}
+layer {
+  name: "loss"
+  type: "SoftmaxWithLoss"
+  bottom: "pool"
+  bottom: "label"
+  top: "loss"
+}
+I0824 19:03:52.015058  6912 layer_factory.hpp:77] Creating layer cifar
+F0824 19:03:52.015187  6912 db_lmdb.hpp:15] Check failed: mdb_status == 0 (2 vs. 0) No such file or directory
+*** Check failure stack trace: ***
+    @     0x7ff6600e05cd  google::LogMessage::Fail()
+    @     0x7ff6600e2433  google::LogMessage::SendToLog()
+    @     0x7ff6600e015b  google::LogMessage::Flush()
+    @     0x7ff6600e2e1e  google::LogMessageFatal::~LogMessageFatal()
+    @     0x7ff660a1f922  caffe::db::MDB_CHECK()
+    @     0x7ff660a1f107  caffe::db::LMDB::Open()
+    @     0x7ff66097d5e4  caffe::DataLayer<>::DataLayer()
+    @     0x7ff66097f856  caffe::Creator_DataLayer<>()
+    @     0x7ff6608fda77  caffe::LayerRegistry<>::CreateLayer()
+    @     0x7ff6608e8d0c  caffe::Net<>::Init()
+    @     0x7ff6608e7690  caffe::Net<>::Net()
+    @     0x7ff6608d7d47  caffe::Solver<>::InitTrainNet()
+    @     0x7ff6608d7565  caffe::Solver<>::Init()
+    @     0x7ff6608d7061  caffe::Solver<>::Solver()
+    @     0x7ff660921cae  caffe::SGDSolver<>::SGDSolver()
+    @     0x7ff66092e3d9  caffe::Creator_SGDSolver<>()
+    @           0x4218f2  caffe::SolverRegistry<>::CreateSolver()
+    @           0x41c991  train()
+    @           0x41ef31  main
+    @     0x7ff65e86d830  __libc_start_main
+    @           0x41b4b9  _start
+    @              (nil)  (unknown)

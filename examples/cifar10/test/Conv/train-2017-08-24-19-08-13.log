@@ -1,0 +1,1661 @@
+I0824 19:08:13.715294  7187 caffe.cpp:218] Using GPUs 0
+I0824 19:08:13.718513  7187 caffe.cpp:223] GPU 0: GeForce GTX 1080
+I0824 19:08:15.368052  7187 solver.cpp:44] Initializing solver from parameters: 
+test_iter: 100
+test_interval: 1000
+base_lr: 0.001
+display: 200
+max_iter: 40000
+lr_policy: "step"
+gamma: 0.0001
+momentum: 0.9
+weight_decay: 0.004
+stepsize: 10000
+snapshot: 10000
+snapshot_prefix: "Conv/Conv_cifar10_quick"
+solver_mode: GPU
+device_id: 0
+net: "Conv_cifar10_quick_train_test.prototxt"
+train_state {
+  level: 0
+  stage: ""
+}
+I0824 19:08:15.368240  7187 solver.cpp:87] Creating training net from net file: Conv_cifar10_quick_train_test.prototxt
+I0824 19:08:15.368553  7187 net.cpp:294] The NetState phase (0) differed from the phase (1) specified by a rule in layer cifar
+I0824 19:08:15.368568  7187 net.cpp:294] The NetState phase (0) differed from the phase (1) specified by a rule in layer accuracy
+I0824 19:08:15.368633  7187 net.cpp:51] Initializing net from parameters: 
+name: "PSConv_CIFAR10"
+state {
+  phase: TRAIN
+  level: 0
+  stage: ""
+}
+layer {
+  name: "cifar"
+  type: "Data"
+  top: "data"
+  top: "label"
+  include {
+    phase: TRAIN
+  }
+  transform_param {
+    mean_file: "../mean.binaryproto"
+  }
+  data_param {
+    source: "../cifar10_train_lmdb"
+    batch_size: 100
+    backend: LMDB
+  }
+}
+layer {
+  name: "conv1"
+  type: "Convolution"
+  bottom: "data"
+  top: "conv1"
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 90
+    pad: 1
+    kernel_size: 3
+    stride: 1
+  }
+}
+layer {
+  name: "relu1"
+  type: "ReLU"
+  bottom: "conv1"
+  top: "conv1"
+}
+layer {
+  name: "conv2"
+  type: "Convolution"
+  bottom: "conv1"
+  top: "conv2"
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 90
+    pad: 1
+    kernel_size: 3
+    stride: 1
+    engine: CAFFE
+    dilation: 2
+    ps_group: 9
+    position_sensetive: true
+  }
+}
+layer {
+  name: "bn2"
+  type: "BatchNorm"
+  bottom: "conv2"
+  top: "conv2"
+}
+layer {
+  name: "scale2"
+  type: "Scale"
+  bottom: "conv2"
+  top: "conv2"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "relu2"
+  type: "ReLU"
+  bottom: "conv2"
+  top: "conv2"
+}
+layer {
+  name: "conv3"
+  type: "Convolution"
+  bottom: "conv2"
+  top: "conv3"
+  convolution_param {
+    num_output: 360
+    pad: 1
+    kernel_size: 3
+    stride: 1
+    engine: CAFFE
+    ps_group: 9
+    position_sensetive: true
+  }
+}
+layer {
+  name: "relu3"
+  type: "ReLU"
+  bottom: "conv3"
+  top: "conv3"
+}
+layer {
+  name: "conv4"
+  type: "Convolution"
+  bottom: "conv3"
+  top: "conv4"
+  convolution_param {
+    num_output: 10
+    pad: 1
+    kernel_size: 3
+    stride: 1
+    engine: CAFFE
+    dilation: 2
+    ps_group: 9
+    position_sensetive: true
+  }
+}
+layer {
+  name: "pool"
+  type: "Pooling"
+  bottom: "conv4"
+  top: "pool"
+  pooling_param {
+    pool: AVE
+    global_pooling: true
+  }
+}
+layer {
+  name: "loss"
+  type: "SoftmaxWithLoss"
+  bottom: "pool"
+  bottom: "label"
+  top: "loss"
+}
+I0824 19:08:15.368974  7187 layer_factory.hpp:77] Creating layer cifar
+I0824 19:08:15.369122  7187 db_lmdb.cpp:35] Opened lmdb ../cifar10_train_lmdb
+I0824 19:08:15.369160  7187 net.cpp:84] Creating Layer cifar
+I0824 19:08:15.369189  7187 net.cpp:380] cifar -> data
+I0824 19:08:15.369305  7187 net.cpp:380] cifar -> label
+I0824 19:08:15.369356  7187 data_transformer.cpp:25] Loading mean file from: ../mean.binaryproto
+I0824 19:08:15.370589  7187 data_layer.cpp:45] output data size: 100,3,32,32
+I0824 19:08:15.375033  7187 base_data_layer.cpp:72] Initializing prefetch
+I0824 19:08:15.375196  7187 base_data_layer.cpp:75] Prefetch initialized.
+I0824 19:08:15.375205  7187 net.cpp:122] Setting up cifar
+I0824 19:08:15.375252  7187 net.cpp:129] Top shape: 100 3 32 32 (307200)
+I0824 19:08:15.375269  7187 net.cpp:129] Top shape: 100 (100)
+I0824 19:08:15.375272  7187 net.cpp:137] Memory required for data: 1229200
+I0824 19:08:15.375291  7187 layer_factory.hpp:77] Creating layer conv1
+I0824 19:08:15.375363  7187 net.cpp:84] Creating Layer conv1
+I0824 19:08:15.375377  7187 net.cpp:406] conv1 <- data
+I0824 19:08:15.375409  7187 net.cpp:380] conv1 -> conv1
+I0824 19:08:15.378188  7192 data_layer.cpp:128] Prefetch batch: 2 ms.
+I0824 19:08:15.378212  7192 data_layer.cpp:129]      Read time: 0.154 ms.
+I0824 19:08:15.378218  7192 data_layer.cpp:130] Transform time: 2.184 ms.
+I0824 19:08:15.387078  7192 data_layer.cpp:128] Prefetch batch: 2 ms.
+I0824 19:08:15.387111  7192 data_layer.cpp:129]      Read time: 0.164 ms.
+I0824 19:08:15.387115  7192 data_layer.cpp:130] Transform time: 2.227 ms.
+I0824 19:08:15.403631  7192 data_layer.cpp:128] Prefetch batch: 12 ms.
+I0824 19:08:15.403648  7192 data_layer.cpp:129]      Read time: 0.161 ms.
+I0824 19:08:15.403666  7192 data_layer.cpp:130] Transform time: 7.412 ms.
+I0824 19:08:15.427178  7192 data_layer.cpp:128] Prefetch batch: 4 ms.
+I0824 19:08:15.427213  7192 data_layer.cpp:129]      Read time: 0.166 ms.
+I0824 19:08:15.427219  7192 data_layer.cpp:130] Transform time: 3.579 ms.
+I0824 19:08:16.064751  7187 cudnn_conv_layer.cpp:194] Reallocating workspace storage: 589824
+I0824 19:08:16.064779  7187 net.cpp:122] Setting up conv1
+I0824 19:08:16.064791  7187 net.cpp:129] Top shape: 100 90 32 32 (9216000)
+I0824 19:08:16.064793  7187 net.cpp:137] Memory required for data: 38093200
+I0824 19:08:16.064882  7187 layer_factory.hpp:77] Creating layer relu1
+I0824 19:08:16.064925  7187 net.cpp:84] Creating Layer relu1
+I0824 19:08:16.064945  7187 net.cpp:406] relu1 <- conv1
+I0824 19:08:16.064980  7187 net.cpp:367] relu1 -> conv1 (in-place)
+I0824 19:08:16.066326  7187 net.cpp:122] Setting up relu1
+I0824 19:08:16.066334  7187 net.cpp:129] Top shape: 100 90 32 32 (9216000)
+I0824 19:08:16.066335  7187 net.cpp:137] Memory required for data: 74957200
+I0824 19:08:16.066339  7187 layer_factory.hpp:77] Creating layer conv2
+I0824 19:08:16.066360  7187 net.cpp:84] Creating Layer conv2
+I0824 19:08:16.066365  7187 net.cpp:406] conv2 <- conv1
+I0824 19:08:16.066391  7187 net.cpp:380] conv2 -> conv2
+I0824 19:08:16.067121  7187 net.cpp:122] Setting up conv2
+I0824 19:08:16.067132  7187 net.cpp:129] Top shape: 100 90 30 30 (8100000)
+I0824 19:08:16.067136  7187 net.cpp:137] Memory required for data: 107357200
+I0824 19:08:16.067150  7187 layer_factory.hpp:77] Creating layer bn2
+I0824 19:08:16.067179  7187 net.cpp:84] Creating Layer bn2
+I0824 19:08:16.067185  7187 net.cpp:406] bn2 <- conv2
+I0824 19:08:16.067195  7187 net.cpp:367] bn2 -> conv2 (in-place)
+I0824 19:08:16.067345  7187 net.cpp:122] Setting up bn2
+I0824 19:08:16.067351  7187 net.cpp:129] Top shape: 100 90 30 30 (8100000)
+I0824 19:08:16.067353  7187 net.cpp:137] Memory required for data: 139757200
+I0824 19:08:16.067387  7187 layer_factory.hpp:77] Creating layer scale2
+I0824 19:08:16.067430  7187 net.cpp:84] Creating Layer scale2
+I0824 19:08:16.067446  7187 net.cpp:406] scale2 <- conv2
+I0824 19:08:16.067468  7187 net.cpp:367] scale2 -> conv2 (in-place)
+I0824 19:08:16.067535  7187 layer_factory.hpp:77] Creating layer scale2
+I0824 19:08:16.067677  7187 net.cpp:122] Setting up scale2
+I0824 19:08:16.067683  7187 net.cpp:129] Top shape: 100 90 30 30 (8100000)
+I0824 19:08:16.067685  7187 net.cpp:137] Memory required for data: 172157200
+I0824 19:08:16.067714  7187 layer_factory.hpp:77] Creating layer relu2
+I0824 19:08:16.067723  7187 net.cpp:84] Creating Layer relu2
+I0824 19:08:16.067728  7187 net.cpp:406] relu2 <- conv2
+I0824 19:08:16.067735  7187 net.cpp:367] relu2 -> conv2 (in-place)
+I0824 19:08:16.068547  7187 net.cpp:122] Setting up relu2
+I0824 19:08:16.068557  7187 net.cpp:129] Top shape: 100 90 30 30 (8100000)
+I0824 19:08:16.068558  7187 net.cpp:137] Memory required for data: 204557200
+I0824 19:08:16.068578  7187 layer_factory.hpp:77] Creating layer conv3
+I0824 19:08:16.068590  7187 net.cpp:84] Creating Layer conv3
+I0824 19:08:16.068595  7187 net.cpp:406] conv3 <- conv2
+I0824 19:08:16.068608  7187 net.cpp:380] conv3 -> conv3
+I0824 19:08:16.069320  7187 net.cpp:122] Setting up conv3
+I0824 19:08:16.069332  7187 net.cpp:129] Top shape: 100 360 30 30 (32400000)
+I0824 19:08:16.069350  7187 net.cpp:137] Memory required for data: 334157200
+I0824 19:08:16.069358  7187 layer_factory.hpp:77] Creating layer relu3
+I0824 19:08:16.069370  7187 net.cpp:84] Creating Layer relu3
+I0824 19:08:16.069384  7187 net.cpp:406] relu3 <- conv3
+I0824 19:08:16.069408  7187 net.cpp:367] relu3 -> conv3 (in-place)
+I0824 19:08:16.070732  7187 net.cpp:122] Setting up relu3
+I0824 19:08:16.070739  7187 net.cpp:129] Top shape: 100 360 30 30 (32400000)
+I0824 19:08:16.070742  7187 net.cpp:137] Memory required for data: 463757200
+I0824 19:08:16.070745  7187 layer_factory.hpp:77] Creating layer conv4
+I0824 19:08:16.070757  7187 net.cpp:84] Creating Layer conv4
+I0824 19:08:16.070762  7187 net.cpp:406] conv4 <- conv3
+I0824 19:08:16.070776  7187 net.cpp:380] conv4 -> conv4
+I0824 19:08:16.070972  7187 net.cpp:122] Setting up conv4
+I0824 19:08:16.070979  7187 net.cpp:129] Top shape: 100 10 28 28 (784000)
+I0824 19:08:16.070982  7187 net.cpp:137] Memory required for data: 466893200
+I0824 19:08:16.070991  7187 layer_factory.hpp:77] Creating layer pool
+I0824 19:08:16.071007  7187 net.cpp:84] Creating Layer pool
+I0824 19:08:16.071012  7187 net.cpp:406] pool <- conv4
+I0824 19:08:16.071022  7187 net.cpp:380] pool -> pool
+I0824 19:08:16.072962  7187 net.cpp:122] Setting up pool
+I0824 19:08:16.072969  7187 net.cpp:129] Top shape: 100 10 1 1 (1000)
+I0824 19:08:16.072973  7187 net.cpp:137] Memory required for data: 466897200
+I0824 19:08:16.072976  7187 layer_factory.hpp:77] Creating layer loss
+I0824 19:08:16.072991  7187 net.cpp:84] Creating Layer loss
+I0824 19:08:16.072996  7187 net.cpp:406] loss <- pool
+I0824 19:08:16.073004  7187 net.cpp:406] loss <- label
+I0824 19:08:16.073014  7187 net.cpp:380] loss -> loss
+I0824 19:08:16.073029  7187 layer_factory.hpp:77] Creating layer loss
+I0824 19:08:16.075224  7187 net.cpp:122] Setting up loss
+I0824 19:08:16.075232  7187 net.cpp:129] Top shape: (1)
+I0824 19:08:16.075234  7187 net.cpp:132]     with loss weight 1
+I0824 19:08:16.075242  7187 net.cpp:137] Memory required for data: 466897204
+I0824 19:08:16.075247  7187 net.cpp:198] loss needs backward computation.
+I0824 19:08:16.075253  7187 net.cpp:198] pool needs backward computation.
+I0824 19:08:16.075256  7187 net.cpp:198] conv4 needs backward computation.
+I0824 19:08:16.075260  7187 net.cpp:198] relu3 needs backward computation.
+I0824 19:08:16.075263  7187 net.cpp:198] conv3 needs backward computation.
+I0824 19:08:16.075265  7187 net.cpp:198] relu2 needs backward computation.
+I0824 19:08:16.075268  7187 net.cpp:198] scale2 needs backward computation.
+I0824 19:08:16.075271  7187 net.cpp:198] bn2 needs backward computation.
+I0824 19:08:16.075273  7187 net.cpp:198] conv2 needs backward computation.
+I0824 19:08:16.075275  7187 net.cpp:198] relu1 needs backward computation.
+I0824 19:08:16.075278  7187 net.cpp:198] conv1 needs backward computation.
+I0824 19:08:16.075283  7187 net.cpp:200] cifar does not need backward computation.
+I0824 19:08:16.075286  7187 net.cpp:242] This network produces output loss
+I0824 19:08:16.075304  7187 net.cpp:255] Network initialization done.
+I0824 19:08:16.075474  7187 solver.cpp:172] Creating test net (#0) specified by net file: Conv_cifar10_quick_train_test.prototxt
+I0824 19:08:16.075510  7187 net.cpp:294] The NetState phase (1) differed from the phase (0) specified by a rule in layer cifar
+I0824 19:08:16.075574  7187 net.cpp:51] Initializing net from parameters: 
+name: "PSConv_CIFAR10"
+state {
+  phase: TEST
+}
+layer {
+  name: "cifar"
+  type: "Data"
+  top: "data"
+  top: "label"
+  include {
+    phase: TEST
+  }
+  transform_param {
+    mean_file: "../mean.binaryproto"
+  }
+  data_param {
+    source: "../cifar10_test_lmdb"
+    batch_size: 100
+    backend: LMDB
+  }
+}
+layer {
+  name: "conv1"
+  type: "Convolution"
+  bottom: "data"
+  top: "conv1"
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 90
+    pad: 1
+    kernel_size: 3
+    stride: 1
+  }
+}
+layer {
+  name: "relu1"
+  type: "ReLU"
+  bottom: "conv1"
+  top: "conv1"
+}
+layer {
+  name: "conv2"
+  type: "Convolution"
+  bottom: "conv1"
+  top: "conv2"
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 90
+    pad: 1
+    kernel_size: 3
+    stride: 1
+    engine: CAFFE
+    dilation: 2
+    ps_group: 9
+    position_sensetive: true
+  }
+}
+layer {
+  name: "bn2"
+  type: "BatchNorm"
+  bottom: "conv2"
+  top: "conv2"
+}
+layer {
+  name: "scale2"
+  type: "Scale"
+  bottom: "conv2"
+  top: "conv2"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "relu2"
+  type: "ReLU"
+  bottom: "conv2"
+  top: "conv2"
+}
+layer {
+  name: "conv3"
+  type: "Convolution"
+  bottom: "conv2"
+  top: "conv3"
+  convolution_param {
+    num_output: 360
+    pad: 1
+    kernel_size: 3
+    stride: 1
+    engine: CAFFE
+    ps_group: 9
+    position_sensetive: true
+  }
+}
+layer {
+  name: "relu3"
+  type: "ReLU"
+  bottom: "conv3"
+  top: "conv3"
+}
+layer {
+  name: "conv4"
+  type: "Convolution"
+  bottom: "conv3"
+  top: "conv4"
+  convolution_param {
+    num_output: 10
+    pad: 1
+    kernel_size: 3
+    stride: 1
+    engine: CAFFE
+    dilation: 2
+    ps_group: 9
+    position_sensetive: true
+  }
+}
+layer {
+  name: "pool"
+  type: "Pooling"
+  bottom: "conv4"
+  top: "pool"
+  pooling_param {
+    pool: AVE
+    global_pooling: true
+  }
+}
+layer {
+  name: "accuracy"
+  type: "Accuracy"
+  bottom: "pool"
+  bottom: "label"
+  top: "accuracy"
+  include {
+    phase: TEST
+  }
+}
+layer {
+  name: "loss"
+  type: "SoftmaxWithLoss"
+  bottom: "pool"
+  bottom: "label"
+  top: "loss"
+}
+I0824 19:08:16.075778  7187 layer_factory.hpp:77] Creating layer cifar
+I0824 19:08:16.075848  7187 db_lmdb.cpp:35] Opened lmdb ../cifar10_test_lmdb
+I0824 19:08:16.075883  7187 net.cpp:84] Creating Layer cifar
+I0824 19:08:16.075898  7187 net.cpp:380] cifar -> data
+I0824 19:08:16.075922  7187 net.cpp:380] cifar -> label
+I0824 19:08:16.075940  7187 data_transformer.cpp:25] Loading mean file from: ../mean.binaryproto
+I0824 19:08:16.076118  7187 data_layer.cpp:45] output data size: 100,3,32,32
+I0824 19:08:16.086339  7187 base_data_layer.cpp:72] Initializing prefetch
+I0824 19:08:16.086421  7187 base_data_layer.cpp:75] Prefetch initialized.
+I0824 19:08:16.086427  7187 net.cpp:122] Setting up cifar
+I0824 19:08:16.086454  7187 net.cpp:129] Top shape: 100 3 32 32 (307200)
+I0824 19:08:16.086475  7187 net.cpp:129] Top shape: 100 (100)
+I0824 19:08:16.086479  7187 net.cpp:137] Memory required for data: 1229200
+I0824 19:08:16.086496  7187 layer_factory.hpp:77] Creating layer label_cifar_1_split
+I0824 19:08:16.086527  7187 net.cpp:84] Creating Layer label_cifar_1_split
+I0824 19:08:16.086539  7187 net.cpp:406] label_cifar_1_split <- label
+I0824 19:08:16.086588  7187 net.cpp:380] label_cifar_1_split -> label_cifar_1_split_0
+I0824 19:08:16.086611  7187 net.cpp:380] label_cifar_1_split -> label_cifar_1_split_1
+I0824 19:08:16.086686  7187 net.cpp:122] Setting up label_cifar_1_split
+I0824 19:08:16.086695  7187 net.cpp:129] Top shape: 100 (100)
+I0824 19:08:16.086701  7187 net.cpp:129] Top shape: 100 (100)
+I0824 19:08:16.086704  7187 net.cpp:137] Memory required for data: 1230000
+I0824 19:08:16.086709  7187 layer_factory.hpp:77] Creating layer conv1
+I0824 19:08:16.086730  7187 net.cpp:84] Creating Layer conv1
+I0824 19:08:16.086736  7187 net.cpp:406] conv1 <- data
+I0824 19:08:16.086751  7187 net.cpp:380] conv1 -> conv1
+I0824 19:08:16.088263  7187 cudnn_conv_layer.cpp:194] Reallocating workspace storage: 589824
+I0824 19:08:16.088279  7187 net.cpp:122] Setting up conv1
+I0824 19:08:16.088287  7187 net.cpp:129] Top shape: 100 90 32 32 (9216000)
+I0824 19:08:16.088290  7187 net.cpp:137] Memory required for data: 38094000
+I0824 19:08:16.088313  7187 layer_factory.hpp:77] Creating layer relu1
+I0824 19:08:16.088327  7187 net.cpp:84] Creating Layer relu1
+I0824 19:08:16.088335  7187 net.cpp:406] relu1 <- conv1
+I0824 19:08:16.088347  7187 net.cpp:367] relu1 -> conv1 (in-place)
+I0824 19:08:16.090445  7187 net.cpp:122] Setting up relu1
+I0824 19:08:16.090454  7187 net.cpp:129] Top shape: 100 90 32 32 (9216000)
+I0824 19:08:16.090459  7187 net.cpp:137] Memory required for data: 74958000
+I0824 19:08:16.090466  7187 layer_factory.hpp:77] Creating layer conv2
+I0824 19:08:16.090486  7187 net.cpp:84] Creating Layer conv2
+I0824 19:08:16.090492  7187 net.cpp:406] conv2 <- conv1
+I0824 19:08:16.090512  7187 net.cpp:380] conv2 -> conv2
+I0824 19:08:16.090735  7187 net.cpp:122] Setting up conv2
+I0824 19:08:16.090745  7187 net.cpp:129] Top shape: 100 90 30 30 (8100000)
+I0824 19:08:16.090749  7187 net.cpp:137] Memory required for data: 107358000
+I0824 19:08:16.090766  7187 layer_factory.hpp:77] Creating layer bn2
+I0824 19:08:16.090780  7187 net.cpp:84] Creating Layer bn2
+I0824 19:08:16.090786  7187 net.cpp:406] bn2 <- conv2
+I0824 19:08:16.090798  7187 net.cpp:367] bn2 -> conv2 (in-place)
+I0824 19:08:16.090951  7187 net.cpp:122] Setting up bn2
+I0824 19:08:16.090958  7187 net.cpp:129] Top shape: 100 90 30 30 (8100000)
+I0824 19:08:16.090963  7187 net.cpp:137] Memory required for data: 139758000
+I0824 19:08:16.090983  7187 layer_factory.hpp:77] Creating layer scale2
+I0824 19:08:16.090997  7187 net.cpp:84] Creating Layer scale2
+I0824 19:08:16.091003  7187 net.cpp:406] scale2 <- conv2
+I0824 19:08:16.091017  7187 net.cpp:367] scale2 -> conv2 (in-place)
+I0824 19:08:16.091063  7187 layer_factory.hpp:77] Creating layer scale2
+I0824 19:08:16.091181  7187 net.cpp:122] Setting up scale2
+I0824 19:08:16.091200  7187 net.cpp:129] Top shape: 100 90 30 30 (8100000)
+I0824 19:08:16.091212  7187 net.cpp:137] Memory required for data: 172158000
+I0824 19:08:16.091239  7187 layer_factory.hpp:77] Creating layer relu2
+I0824 19:08:16.091261  7187 net.cpp:84] Creating Layer relu2
+I0824 19:08:16.091276  7187 net.cpp:406] relu2 <- conv2
+I0824 19:08:16.091300  7187 net.cpp:367] relu2 -> conv2 (in-place)
+I0824 19:08:16.091315  7193 data_layer.cpp:128] Prefetch batch: 4 ms.
+I0824 19:08:16.091328  7193 data_layer.cpp:129]      Read time: 0.262 ms.
+I0824 19:08:16.091334  7193 data_layer.cpp:130] Transform time: 3.807 ms.
+I0824 19:08:16.092732  7187 net.cpp:122] Setting up relu2
+I0824 19:08:16.092742  7187 net.cpp:129] Top shape: 100 90 30 30 (8100000)
+I0824 19:08:16.092746  7187 net.cpp:137] Memory required for data: 204558000
+I0824 19:08:16.092752  7187 layer_factory.hpp:77] Creating layer conv3
+I0824 19:08:16.092769  7187 net.cpp:84] Creating Layer conv3
+I0824 19:08:16.092777  7187 net.cpp:406] conv3 <- conv2
+I0824 19:08:16.092792  7187 net.cpp:380] conv3 -> conv3
+I0824 19:08:16.095175  7187 net.cpp:122] Setting up conv3
+I0824 19:08:16.095202  7187 net.cpp:129] Top shape: 100 360 30 30 (32400000)
+I0824 19:08:16.095206  7187 net.cpp:137] Memory required for data: 334158000
+I0824 19:08:16.095216  7187 layer_factory.hpp:77] Creating layer relu3
+I0824 19:08:16.095228  7187 net.cpp:84] Creating Layer relu3
+I0824 19:08:16.095233  7187 net.cpp:406] relu3 <- conv3
+I0824 19:08:16.095245  7187 net.cpp:367] relu3 -> conv3 (in-place)
+I0824 19:08:16.095388  7187 net.cpp:122] Setting up relu3
+I0824 19:08:16.095394  7187 net.cpp:129] Top shape: 100 360 30 30 (32400000)
+I0824 19:08:16.095396  7187 net.cpp:137] Memory required for data: 463758000
+I0824 19:08:16.095415  7187 layer_factory.hpp:77] Creating layer conv4
+I0824 19:08:16.095428  7187 net.cpp:84] Creating Layer conv4
+I0824 19:08:16.095433  7187 net.cpp:406] conv4 <- conv3
+I0824 19:08:16.095446  7187 net.cpp:380] conv4 -> conv4
+I0824 19:08:16.095666  7187 net.cpp:122] Setting up conv4
+I0824 19:08:16.095690  7187 net.cpp:129] Top shape: 100 10 28 28 (784000)
+I0824 19:08:16.095691  7187 net.cpp:137] Memory required for data: 466894000
+I0824 19:08:16.095700  7187 layer_factory.hpp:77] Creating layer pool
+I0824 19:08:16.095711  7187 net.cpp:84] Creating Layer pool
+I0824 19:08:16.095717  7187 net.cpp:406] pool <- conv4
+I0824 19:08:16.095728  7187 net.cpp:380] pool -> pool
+I0824 19:08:16.097110  7187 net.cpp:122] Setting up pool
+I0824 19:08:16.097118  7187 net.cpp:129] Top shape: 100 10 1 1 (1000)
+I0824 19:08:16.097136  7187 net.cpp:137] Memory required for data: 466898000
+I0824 19:08:16.097139  7187 layer_factory.hpp:77] Creating layer pool_pool_0_split
+I0824 19:08:16.097148  7187 net.cpp:84] Creating Layer pool_pool_0_split
+I0824 19:08:16.097153  7187 net.cpp:406] pool_pool_0_split <- pool
+I0824 19:08:16.097165  7187 net.cpp:380] pool_pool_0_split -> pool_pool_0_split_0
+I0824 19:08:16.097177  7187 net.cpp:380] pool_pool_0_split -> pool_pool_0_split_1
+I0824 19:08:16.097244  7187 net.cpp:122] Setting up pool_pool_0_split
+I0824 19:08:16.097251  7187 net.cpp:129] Top shape: 100 10 1 1 (1000)
+I0824 19:08:16.097255  7187 net.cpp:129] Top shape: 100 10 1 1 (1000)
+I0824 19:08:16.097259  7187 net.cpp:137] Memory required for data: 466906000
+I0824 19:08:16.097263  7187 layer_factory.hpp:77] Creating layer accuracy
+I0824 19:08:16.097281  7187 net.cpp:84] Creating Layer accuracy
+I0824 19:08:16.097287  7187 net.cpp:406] accuracy <- pool_pool_0_split_0
+I0824 19:08:16.097295  7193 data_layer.cpp:128] Prefetch batch: 4 ms.
+I0824 19:08:16.097299  7187 net.cpp:406] accuracy <- label_cifar_1_split_0
+I0824 19:08:16.097303  7193 data_layer.cpp:129]      Read time: 0.147 ms.
+I0824 19:08:16.097306  7193 data_layer.cpp:130] Transform time: 4.221 ms.
+I0824 19:08:16.097314  7187 net.cpp:380] accuracy -> accuracy
+I0824 19:08:16.097334  7187 net.cpp:122] Setting up accuracy
+I0824 19:08:16.097342  7187 net.cpp:129] Top shape: (1)
+I0824 19:08:16.097345  7187 net.cpp:137] Memory required for data: 466906004
+I0824 19:08:16.097350  7187 layer_factory.hpp:77] Creating layer loss
+I0824 19:08:16.097362  7187 net.cpp:84] Creating Layer loss
+I0824 19:08:16.097368  7187 net.cpp:406] loss <- pool_pool_0_split_1
+I0824 19:08:16.097379  7187 net.cpp:406] loss <- label_cifar_1_split_1
+I0824 19:08:16.097388  7187 net.cpp:380] loss -> loss
+I0824 19:08:16.097404  7187 layer_factory.hpp:77] Creating layer loss
+I0824 19:08:16.101877  7187 net.cpp:122] Setting up loss
+I0824 19:08:16.101888  7187 net.cpp:129] Top shape: (1)
+I0824 19:08:16.101892  7187 net.cpp:132]     with loss weight 1
+I0824 19:08:16.101898  7187 net.cpp:137] Memory required for data: 466906008
+I0824 19:08:16.101907  7187 net.cpp:198] loss needs backward computation.
+I0824 19:08:16.101914  7187 net.cpp:200] accuracy does not need backward computation.
+I0824 19:08:16.101920  7187 net.cpp:198] pool_pool_0_split needs backward computation.
+I0824 19:08:16.101925  7187 net.cpp:198] pool needs backward computation.
+I0824 19:08:16.101932  7187 net.cpp:198] conv4 needs backward computation.
+I0824 19:08:16.101938  7187 net.cpp:198] relu3 needs backward computation.
+I0824 19:08:16.101941  7187 net.cpp:198] conv3 needs backward computation.
+I0824 19:08:16.101946  7187 net.cpp:198] relu2 needs backward computation.
+I0824 19:08:16.101951  7187 net.cpp:198] scale2 needs backward computation.
+I0824 19:08:16.101956  7187 net.cpp:198] bn2 needs backward computation.
+I0824 19:08:16.101961  7187 net.cpp:198] conv2 needs backward computation.
+I0824 19:08:16.101966  7187 net.cpp:198] relu1 needs backward computation.
+I0824 19:08:16.101971  7187 net.cpp:198] conv1 needs backward computation.
+I0824 19:08:16.101979  7187 net.cpp:200] label_cifar_1_split does not need backward computation.
+I0824 19:08:16.101985  7187 net.cpp:200] cifar does not need backward computation.
+I0824 19:08:16.101989  7187 net.cpp:242] This network produces output accuracy
+I0824 19:08:16.101997  7187 net.cpp:242] This network produces output loss
+I0824 19:08:16.102017  7187 net.cpp:255] Network initialization done.
+I0824 19:08:16.102066  7187 solver.cpp:56] Solver scaffolding done.
+I0824 19:08:16.102440  7187 caffe.cpp:248] Starting Optimization
+I0824 19:08:16.102447  7187 solver.cpp:272] Solving PSConv_CIFAR10
+I0824 19:08:16.102449  7187 solver.cpp:273] Learning Rate Policy: step
+I0824 19:08:16.103412  7187 solver.cpp:330] Iteration 0, Testing net (#0)
+I0824 19:08:16.103425  7187 net.cpp:679] Copying source layer cifar
+I0824 19:08:16.103430  7187 net.cpp:679] Copying source layer conv1
+I0824 19:08:16.103999  7187 net.cpp:679] Copying source layer relu1
+I0824 19:08:16.104003  7187 net.cpp:679] Copying source layer conv2
+I0824 19:08:16.104030  7187 net.cpp:679] Copying source layer bn2
+I0824 19:08:16.104089  7187 net.cpp:679] Copying source layer scale2
+I0824 19:08:16.104137  7187 net.cpp:679] Copying source layer relu2
+I0824 19:08:16.104141  7187 net.cpp:679] Copying source layer conv3
+I0824 19:08:16.104166  7187 net.cpp:679] Copying source layer relu3
+I0824 19:08:16.104169  7187 net.cpp:679] Copying source layer conv4
+I0824 19:08:16.104199  7187 net.cpp:679] Copying source layer pool
+I0824 19:08:16.104204  7187 net.cpp:679] Copying source layer loss
+I0824 19:08:16.104230  7193 data_layer.cpp:128] Prefetch batch: 6 ms.
+I0824 19:08:16.104236  7193 data_layer.cpp:129]      Read time: 0.145 ms.
+I0824 19:08:16.104239  7193 data_layer.cpp:130] Transform time: 6.071 ms.
+I0824 19:08:16.117329  7193 data_layer.cpp:128] Prefetch batch: 11 ms.
+I0824 19:08:16.117339  7193 data_layer.cpp:129]      Read time: 0.151 ms.
+I0824 19:08:16.117341  7193 data_layer.cpp:130] Transform time: 9.703 ms.
+I0824 19:08:16.197037  7193 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:16.197052  7193 data_layer.cpp:129]      Read time: 0.152 ms.
+I0824 19:08:16.197055  7193 data_layer.cpp:130] Transform time: 3.511 ms.
+I0824 19:08:16.234824  7193 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:16.234839  7193 data_layer.cpp:129]      Read time: 0.149 ms.
+I0824 19:08:16.234843  7193 data_layer.cpp:130] Transform time: 3.283 ms.
+I0824 19:08:16.307675  7193 data_layer.cpp:128] Prefetch batch: 5 ms.
+I0824 19:08:16.307685  7193 data_layer.cpp:129]      Read time: 0.259 ms.
+I0824 19:08:16.307689  7193 data_layer.cpp:130] Transform time: 5.394 ms.
+I0824 19:08:16.387437  7193 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:08:16.387452  7193 data_layer.cpp:129]      Read time: 0.147 ms.
+I0824 19:08:16.387455  7193 data_layer.cpp:130] Transform time: 9.837 ms.
+I0824 19:08:16.442185  7193 data_layer.cpp:128] Prefetch batch: 4 ms.
+I0824 19:08:16.442198  7193 data_layer.cpp:129]      Read time: 0.146 ms.
+I0824 19:08:16.442201  7193 data_layer.cpp:130] Transform time: 3.643 ms.
+I0824 19:08:16.479018  7193 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:16.479032  7193 data_layer.cpp:129]      Read time: 0.143 ms.
+I0824 19:08:16.479034  7193 data_layer.cpp:130] Transform time: 3.167 ms.
+I0824 19:08:16.552428  7193 data_layer.cpp:128] Prefetch batch: 5 ms.
+I0824 19:08:16.552443  7193 data_layer.cpp:129]      Read time: 0.258 ms.
+I0824 19:08:16.552448  7193 data_layer.cpp:130] Transform time: 5.196 ms.
+I0824 19:08:16.618788  7193 data_layer.cpp:128] Prefetch batch: 5 ms.
+I0824 19:08:16.618801  7193 data_layer.cpp:129]      Read time: 0.144 ms.
+I0824 19:08:16.618804  7193 data_layer.cpp:130] Transform time: 5.169 ms.
+I0824 19:08:16.686244  7193 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:16.686259  7193 data_layer.cpp:129]      Read time: 0.15 ms.
+I0824 19:08:16.686261  7193 data_layer.cpp:130] Transform time: 3.611 ms.
+I0824 19:08:16.724023  7193 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:16.724038  7193 data_layer.cpp:129]      Read time: 0.148 ms.
+I0824 19:08:16.724041  7193 data_layer.cpp:130] Transform time: 3.575 ms.
+I0824 19:08:16.790676  7193 data_layer.cpp:128] Prefetch batch: 5 ms.
+I0824 19:08:16.790690  7193 data_layer.cpp:129]      Read time: 0.154 ms.
+I0824 19:08:16.790693  7193 data_layer.cpp:130] Transform time: 5.111 ms.
+I0824 19:08:16.861707  7193 data_layer.cpp:128] Prefetch batch: 6 ms.
+I0824 19:08:16.861721  7193 data_layer.cpp:129]      Read time: 0.151 ms.
+I0824 19:08:16.861723  7193 data_layer.cpp:130] Transform time: 5.888 ms.
+I0824 19:08:16.930537  7193 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:16.930552  7193 data_layer.cpp:129]      Read time: 0.152 ms.
+I0824 19:08:16.930554  7193 data_layer.cpp:130] Transform time: 3.608 ms.
+I0824 19:08:16.968323  7193 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:16.968338  7193 data_layer.cpp:129]      Read time: 0.151 ms.
+I0824 19:08:16.968341  7193 data_layer.cpp:130] Transform time: 3.571 ms.
+I0824 19:08:17.024696  7193 data_layer.cpp:128] Prefetch batch: 5 ms.
+I0824 19:08:17.024709  7193 data_layer.cpp:129]      Read time: 0.147 ms.
+I0824 19:08:17.024713  7193 data_layer.cpp:130] Transform time: 5.021 ms.
+I0824 19:08:17.094600  7193 data_layer.cpp:128] Prefetch batch: 5 ms.
+I0824 19:08:17.094610  7193 data_layer.cpp:129]      Read time: 0.147 ms.
+I0824 19:08:17.094614  7193 data_layer.cpp:130] Transform time: 5.146 ms.
+I0824 19:08:17.174656  7193 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:08:17.174688  7193 data_layer.cpp:129]      Read time: 0.154 ms.
+I0824 19:08:17.174692  7193 data_layer.cpp:130] Transform time: 9.826 ms.
+I0824 19:08:17.212436  7193 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:17.212451  7193 data_layer.cpp:129]      Read time: 0.16 ms.
+I0824 19:08:17.212455  7193 data_layer.cpp:130] Transform time: 2.81 ms.
+I0824 19:08:17.257357  7193 data_layer.cpp:128] Prefetch batch: 5 ms.
+I0824 19:08:17.257369  7193 data_layer.cpp:129]      Read time: 0.157 ms.
+I0824 19:08:17.257372  7193 data_layer.cpp:130] Transform time: 5.129 ms.
+I0824 19:08:17.327347  7193 data_layer.cpp:128] Prefetch batch: 4 ms.
+I0824 19:08:17.327358  7193 data_layer.cpp:129]      Read time: 0.136 ms.
+I0824 19:08:17.327361  7193 data_layer.cpp:130] Transform time: 4.611 ms.
+I0824 19:08:17.401789  7193 data_layer.cpp:128] Prefetch batch: 5 ms.
+I0824 19:08:17.401804  7193 data_layer.cpp:129]      Read time: 0.152 ms.
+I0824 19:08:17.401808  7193 data_layer.cpp:130] Transform time: 5.252 ms.
+I0824 19:08:17.455626  7193 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:17.455641  7193 data_layer.cpp:129]      Read time: 0.14 ms.
+I0824 19:08:17.455643  7193 data_layer.cpp:130] Transform time: 3.085 ms.
+I0824 19:08:17.492691  7193 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:17.492707  7193 data_layer.cpp:129]      Read time: 0.148 ms.
+I0824 19:08:17.492709  7193 data_layer.cpp:130] Transform time: 2.995 ms.
+I0824 19:08:17.564803  7193 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:17.564818  7193 data_layer.cpp:129]      Read time: 0.153 ms.
+I0824 19:08:17.564821  7193 data_layer.cpp:130] Transform time: 3.057 ms.
+I0824 19:08:17.631178  7193 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:17.631193  7193 data_layer.cpp:129]      Read time: 0.148 ms.
+I0824 19:08:17.631196  7193 data_layer.cpp:130] Transform time: 2.955 ms.
+I0824 19:08:17.700292  7193 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:17.700307  7193 data_layer.cpp:129]      Read time: 0.138 ms.
+I0824 19:08:17.700310  7193 data_layer.cpp:130] Transform time: 3.137 ms.
+I0824 19:08:17.737987  7193 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:17.738000  7193 data_layer.cpp:129]      Read time: 0.153 ms.
+I0824 19:08:17.738003  7193 data_layer.cpp:130] Transform time: 3.081 ms.
+I0824 19:08:17.803386  7193 data_layer.cpp:128] Prefetch batch: 7 ms.
+I0824 19:08:17.803402  7193 data_layer.cpp:129]      Read time: 0.15 ms.
+I0824 19:08:17.803406  7193 data_layer.cpp:130] Transform time: 7.203 ms.
+I0824 19:08:17.873348  7193 data_layer.cpp:128] Prefetch batch: 4 ms.
+I0824 19:08:17.873364  7193 data_layer.cpp:129]      Read time: 0.152 ms.
+I0824 19:08:17.873368  7193 data_layer.cpp:130] Transform time: 4.362 ms.
+I0824 19:08:17.945622  7193 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:17.945638  7193 data_layer.cpp:129]      Read time: 0.149 ms.
+I0824 19:08:17.945641  7193 data_layer.cpp:130] Transform time: 3.514 ms.
+I0824 19:08:17.981652  7193 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:17.981660  7193 data_layer.cpp:129]      Read time: 0.137 ms.
+I0824 19:08:17.981663  7193 data_layer.cpp:130] Transform time: 3.15 ms.
+I0824 19:08:18.029918  7193 data_layer.cpp:128] Prefetch batch: 5 ms.
+I0824 19:08:18.029927  7193 data_layer.cpp:129]      Read time: 0.138 ms.
+I0824 19:08:18.029930  7193 data_layer.cpp:130] Transform time: 5.105 ms.
+I0824 19:08:18.104737  7193 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:08:18.104746  7193 data_layer.cpp:129]      Read time: 0.147 ms.
+I0824 19:08:18.104749  7193 data_layer.cpp:130] Transform time: 9.897 ms.
+I0824 19:08:18.174648  7193 data_layer.cpp:128] Prefetch batch: 5 ms.
+I0824 19:08:18.174662  7193 data_layer.cpp:129]      Read time: 0.146 ms.
+I0824 19:08:18.174665  7193 data_layer.cpp:130] Transform time: 5.282 ms.
+I0824 19:08:18.222254  7193 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:18.222270  7193 data_layer.cpp:129]      Read time: 0.14 ms.
+I0824 19:08:18.222273  7193 data_layer.cpp:130] Transform time: 3.133 ms.
+I0824 19:08:18.259610  7193 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:18.259624  7193 data_layer.cpp:129]      Read time: 0.179 ms.
+I0824 19:08:18.259626  7193 data_layer.cpp:130] Transform time: 3.488 ms.
+I0824 19:08:18.332922  7193 data_layer.cpp:128] Prefetch batch: 5 ms.
+I0824 19:08:18.332932  7193 data_layer.cpp:129]      Read time: 0.142 ms.
+I0824 19:08:18.332936  7193 data_layer.cpp:130] Transform time: 5.537 ms.
+I0824 19:08:18.407232  7193 data_layer.cpp:128] Prefetch batch: 5 ms.
+I0824 19:08:18.407246  7193 data_layer.cpp:129]      Read time: 0.162 ms.
+I0824 19:08:18.407249  7193 data_layer.cpp:130] Transform time: 5.279 ms.
+I0824 19:08:18.465250  7193 data_layer.cpp:128] Prefetch batch: 4 ms.
+I0824 19:08:18.465260  7193 data_layer.cpp:129]      Read time: 0.155 ms.
+I0824 19:08:18.465262  7193 data_layer.cpp:130] Transform time: 3.725 ms.
+I0824 19:08:18.502223  7193 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:18.502235  7193 data_layer.cpp:129]      Read time: 0.187 ms.
+I0824 19:08:18.502238  7193 data_layer.cpp:130] Transform time: 3.475 ms.
+I0824 19:08:18.571954  7193 data_layer.cpp:128] Prefetch batch: 5 ms.
+I0824 19:08:18.571964  7193 data_layer.cpp:129]      Read time: 0.155 ms.
+I0824 19:08:18.571967  7193 data_layer.cpp:130] Transform time: 5.184 ms.
+I0824 19:08:18.637423  7193 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:18.637432  7193 data_layer.cpp:129]      Read time: 0.145 ms.
+I0824 19:08:18.637435  7193 data_layer.cpp:130] Transform time: 2.978 ms.
+I0824 19:08:18.705374  7193 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:18.705384  7193 data_layer.cpp:129]      Read time: 0.152 ms.
+I0824 19:08:18.705386  7193 data_layer.cpp:130] Transform time: 3.134 ms.
+I0824 19:08:18.741901  7193 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:18.741911  7193 data_layer.cpp:129]      Read time: 0.142 ms.
+I0824 19:08:18.741914  7193 data_layer.cpp:130] Transform time: 3.156 ms.
+I0824 19:08:18.800132  7193 data_layer.cpp:128] Prefetch batch: 5 ms.
+I0824 19:08:18.800140  7193 data_layer.cpp:129]      Read time: 0.14 ms.
+I0824 19:08:18.800143  7193 data_layer.cpp:130] Transform time: 5.137 ms.
+I0824 19:08:18.869119  7193 data_layer.cpp:128] Prefetch batch: 5 ms.
+I0824 19:08:18.869128  7193 data_layer.cpp:129]      Read time: 0.141 ms.
+I0824 19:08:18.869132  7193 data_layer.cpp:130] Transform time: 5.228 ms.
+I0824 19:08:18.943225  7193 data_layer.cpp:128] Prefetch batch: 5 ms.
+I0824 19:08:18.943234  7193 data_layer.cpp:129]      Read time: 0.141 ms.
+I0824 19:08:18.943238  7193 data_layer.cpp:130] Transform time: 5.284 ms.
+I0824 19:08:18.981744  7193 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:18.981752  7193 data_layer.cpp:129]      Read time: 0.139 ms.
+I0824 19:08:18.981755  7193 data_layer.cpp:130] Transform time: 3.154 ms.
+I0824 19:08:19.024101  7193 data_layer.cpp:128] Prefetch batch: 5 ms.
+I0824 19:08:19.024108  7193 data_layer.cpp:129]      Read time: 0.141 ms.
+I0824 19:08:19.024111  7193 data_layer.cpp:130] Transform time: 5.086 ms.
+I0824 19:08:19.090486  7193 data_layer.cpp:128] Prefetch batch: 5 ms.
+I0824 19:08:19.090497  7193 data_layer.cpp:129]      Read time: 0.141 ms.
+I0824 19:08:19.090499  7193 data_layer.cpp:130] Transform time: 5.111 ms.
+I0824 19:08:19.164232  7193 data_layer.cpp:128] Prefetch batch: 5 ms.
+I0824 19:08:19.164242  7193 data_layer.cpp:129]      Read time: 0.135 ms.
+I0824 19:08:19.164244  7193 data_layer.cpp:130] Transform time: 5.216 ms.
+I0824 19:08:19.221339  7193 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:19.221349  7193 data_layer.cpp:129]      Read time: 0.146 ms.
+I0824 19:08:19.221352  7193 data_layer.cpp:130] Transform time: 3.158 ms.
+I0824 19:08:19.257891  7193 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:19.257900  7193 data_layer.cpp:129]      Read time: 0.14 ms.
+I0824 19:08:19.257903  7193 data_layer.cpp:130] Transform time: 3.18 ms.
+I0824 19:08:19.326014  7193 data_layer.cpp:128] Prefetch batch: 5 ms.
+I0824 19:08:19.326023  7193 data_layer.cpp:129]      Read time: 0.142 ms.
+I0824 19:08:19.326040  7193 data_layer.cpp:130] Transform time: 5.08 ms.
+I0824 19:08:19.393535  7193 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:19.393544  7193 data_layer.cpp:129]      Read time: 0.143 ms.
+I0824 19:08:19.393548  7193 data_layer.cpp:130] Transform time: 3.6 ms.
+I0824 19:08:19.461060  7193 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:19.461069  7193 data_layer.cpp:129]      Read time: 0.132 ms.
+I0824 19:08:19.461072  7193 data_layer.cpp:130] Transform time: 3.133 ms.
+I0824 19:08:19.497702  7193 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:19.497711  7193 data_layer.cpp:129]      Read time: 0.149 ms.
+I0824 19:08:19.497714  7193 data_layer.cpp:130] Transform time: 3.195 ms.
+I0824 19:08:19.553936  7193 data_layer.cpp:128] Prefetch batch: 5 ms.
+I0824 19:08:19.553946  7193 data_layer.cpp:129]      Read time: 0.139 ms.
+I0824 19:08:19.553949  7193 data_layer.cpp:130] Transform time: 5.088 ms.
+I0824 19:08:19.622943  7193 data_layer.cpp:128] Prefetch batch: 5 ms.
+I0824 19:08:19.622952  7193 data_layer.cpp:129]      Read time: 0.143 ms.
+I0824 19:08:19.622956  7193 data_layer.cpp:130] Transform time: 5.199 ms.
+I0824 19:08:19.697399  7193 data_layer.cpp:128] Prefetch batch: 5 ms.
+I0824 19:08:19.697412  7193 data_layer.cpp:129]      Read time: 0.147 ms.
+I0824 19:08:19.697415  7193 data_layer.cpp:130] Transform time: 5.224 ms.
+I0824 19:08:19.738365  7193 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:19.738375  7193 data_layer.cpp:129]      Read time: 0.14 ms.
+I0824 19:08:19.738379  7193 data_layer.cpp:130] Transform time: 3.186 ms.
+I0824 19:08:19.779677  7193 data_layer.cpp:128] Prefetch batch: 5 ms.
+I0824 19:08:19.779695  7193 data_layer.cpp:129]      Read time: 0.144 ms.
+I0824 19:08:19.779698  7193 data_layer.cpp:130] Transform time: 5.087 ms.
+I0824 19:08:19.848028  7193 data_layer.cpp:128] Prefetch batch: 5 ms.
+I0824 19:08:19.848037  7193 data_layer.cpp:129]      Read time: 0.147 ms.
+I0824 19:08:19.848042  7193 data_layer.cpp:130] Transform time: 5.203 ms.
+I0824 19:08:19.921715  7193 data_layer.cpp:128] Prefetch batch: 5 ms.
+I0824 19:08:19.921725  7193 data_layer.cpp:129]      Read time: 0.141 ms.
+I0824 19:08:19.921728  7193 data_layer.cpp:130] Transform time: 5.27 ms.
+I0824 19:08:19.979065  7193 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:19.979074  7193 data_layer.cpp:129]      Read time: 0.143 ms.
+I0824 19:08:19.979077  7193 data_layer.cpp:130] Transform time: 3.105 ms.
+I0824 19:08:20.015990  7193 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:20.015997  7193 data_layer.cpp:129]      Read time: 0.143 ms.
+I0824 19:08:20.016000  7193 data_layer.cpp:130] Transform time: 3.577 ms.
+I0824 19:08:20.085906  7193 data_layer.cpp:128] Prefetch batch: 5 ms.
+I0824 19:08:20.085918  7193 data_layer.cpp:129]      Read time: 0.147 ms.
+I0824 19:08:20.085922  7193 data_layer.cpp:130] Transform time: 5.162 ms.
+I0824 19:08:20.151666  7193 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:20.151676  7193 data_layer.cpp:129]      Read time: 0.142 ms.
+I0824 19:08:20.151680  7193 data_layer.cpp:130] Transform time: 2.925 ms.
+I0824 19:08:20.219657  7193 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:20.219666  7193 data_layer.cpp:129]      Read time: 0.142 ms.
+I0824 19:08:20.219669  7193 data_layer.cpp:130] Transform time: 3.156 ms.
+I0824 19:08:20.255970  7193 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:20.255980  7193 data_layer.cpp:129]      Read time: 0.138 ms.
+I0824 19:08:20.255982  7193 data_layer.cpp:130] Transform time: 3.091 ms.
+I0824 19:08:20.314249  7193 data_layer.cpp:128] Prefetch batch: 5 ms.
+I0824 19:08:20.314257  7193 data_layer.cpp:129]      Read time: 0.139 ms.
+I0824 19:08:20.314260  7193 data_layer.cpp:130] Transform time: 5.134 ms.
+I0824 19:08:20.383733  7193 data_layer.cpp:128] Prefetch batch: 5 ms.
+I0824 19:08:20.383744  7193 data_layer.cpp:129]      Read time: 0.146 ms.
+I0824 19:08:20.383747  7193 data_layer.cpp:130] Transform time: 5.189 ms.
+I0824 19:08:20.458431  7193 data_layer.cpp:128] Prefetch batch: 5 ms.
+I0824 19:08:20.458448  7193 data_layer.cpp:129]      Read time: 0.15 ms.
+I0824 19:08:20.458482  7193 data_layer.cpp:130] Transform time: 4.935 ms.
+I0824 19:08:20.498271  7193 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:20.498287  7193 data_layer.cpp:129]      Read time: 0.148 ms.
+I0824 19:08:20.498291  7193 data_layer.cpp:130] Transform time: 3.177 ms.
+I0824 19:08:20.546190  7193 data_layer.cpp:128] Prefetch batch: 5 ms.
+I0824 19:08:20.546207  7193 data_layer.cpp:129]      Read time: 0.149 ms.
+I0824 19:08:20.546211  7193 data_layer.cpp:130] Transform time: 5.136 ms.
+I0824 19:08:20.616791  7193 data_layer.cpp:128] Prefetch batch: 5 ms.
+I0824 19:08:20.616806  7193 data_layer.cpp:129]      Read time: 0.151 ms.
+I0824 19:08:20.616808  7193 data_layer.cpp:130] Transform time: 4.952 ms.
+I0824 19:08:20.690511  7193 data_layer.cpp:128] Prefetch batch: 5 ms.
+I0824 19:08:20.690527  7193 data_layer.cpp:129]      Read time: 0.168 ms.
+I0824 19:08:20.690531  7193 data_layer.cpp:130] Transform time: 5.255 ms.
+I0824 19:08:20.743204  7193 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:20.743221  7193 data_layer.cpp:129]      Read time: 0.139 ms.
+I0824 19:08:20.743224  7193 data_layer.cpp:130] Transform time: 3.152 ms.
+I0824 19:08:20.780058  7193 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:20.780074  7193 data_layer.cpp:129]      Read time: 0.151 ms.
+I0824 19:08:20.780077  7193 data_layer.cpp:130] Transform time: 3.098 ms.
+I0824 19:08:20.851429  7193 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:20.851446  7193 data_layer.cpp:129]      Read time: 0.149 ms.
+I0824 19:08:20.851450  7193 data_layer.cpp:130] Transform time: 3.132 ms.
+I0824 19:08:20.920410  7193 data_layer.cpp:128] Prefetch batch: 5 ms.
+I0824 19:08:20.920428  7193 data_layer.cpp:129]      Read time: 0.143 ms.
+I0824 19:08:20.920433  7193 data_layer.cpp:130] Transform time: 5.161 ms.
+I0824 19:08:20.987471  7193 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:20.987486  7193 data_layer.cpp:129]      Read time: 0.147 ms.
+I0824 19:08:20.987489  7193 data_layer.cpp:130] Transform time: 3.132 ms.
+I0824 19:08:21.024803  7193 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:21.024817  7193 data_layer.cpp:129]      Read time: 0.153 ms.
+I0824 19:08:21.024821  7193 data_layer.cpp:130] Transform time: 3.11 ms.
+I0824 19:08:21.090760  7193 data_layer.cpp:128] Prefetch batch: 5 ms.
+I0824 19:08:21.090777  7193 data_layer.cpp:129]      Read time: 0.184 ms.
+I0824 19:08:21.090781  7193 data_layer.cpp:130] Transform time: 5.442 ms.
+I0824 19:08:21.161073  7193 data_layer.cpp:128] Prefetch batch: 5 ms.
+I0824 19:08:21.161089  7193 data_layer.cpp:129]      Read time: 0.147 ms.
+I0824 19:08:21.161092  7193 data_layer.cpp:130] Transform time: 5.19 ms.
+I0824 19:08:21.232484  7193 data_layer.cpp:128] Prefetch batch: 4 ms.
+I0824 19:08:21.232499  7193 data_layer.cpp:129]      Read time: 0.191 ms.
+I0824 19:08:21.232503  7193 data_layer.cpp:130] Transform time: 3.801 ms.
+I0824 19:08:21.269356  7193 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:21.269373  7193 data_layer.cpp:129]      Read time: 0.14 ms.
+I0824 19:08:21.269376  7193 data_layer.cpp:130] Transform time: 3.344 ms.
+I0824 19:08:21.318675  7193 data_layer.cpp:128] Prefetch batch: 5 ms.
+I0824 19:08:21.318692  7193 data_layer.cpp:129]      Read time: 0.14 ms.
+I0824 19:08:21.318696  7193 data_layer.cpp:130] Transform time: 5.191 ms.
+I0824 19:08:21.388311  7193 data_layer.cpp:128] Prefetch batch: 4 ms.
+I0824 19:08:21.388324  7193 data_layer.cpp:129]      Read time: 0.147 ms.
+I0824 19:08:21.388327  7193 data_layer.cpp:130] Transform time: 4.591 ms.
+I0824 19:08:21.464984  7193 data_layer.cpp:128] Prefetch batch: 8 ms.
+I0824 19:08:21.465001  7193 data_layer.cpp:129]      Read time: 0.156 ms.
+I0824 19:08:21.465004  7193 data_layer.cpp:130] Transform time: 7.767 ms.
+I0824 19:08:21.512527  7193 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:21.512542  7193 data_layer.cpp:129]      Read time: 0.148 ms.
+I0824 19:08:21.512544  7193 data_layer.cpp:130] Transform time: 3.073 ms.
+I0824 19:08:21.551872  7193 data_layer.cpp:128] Prefetch batch: 5 ms.
+I0824 19:08:21.551901  7193 data_layer.cpp:129]      Read time: 0.138 ms.
+I0824 19:08:21.551904  7193 data_layer.cpp:130] Transform time: 5.041 ms.
+I0824 19:08:21.626446  7193 data_layer.cpp:128] Prefetch batch: 8 ms.
+I0824 19:08:21.626457  7193 data_layer.cpp:129]      Read time: 0.15 ms.
+I0824 19:08:21.626461  7193 data_layer.cpp:130] Transform time: 7.801 ms.
+I0824 19:08:21.701184  7193 data_layer.cpp:128] Prefetch batch: 7 ms.
+I0824 19:08:21.701200  7193 data_layer.cpp:129]      Read time: 0.16 ms.
+I0824 19:08:21.701205  7193 data_layer.cpp:130] Transform time: 7.454 ms.
+I0824 19:08:21.757833  7193 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:21.757849  7193 data_layer.cpp:129]      Read time: 0.147 ms.
+I0824 19:08:21.757853  7193 data_layer.cpp:130] Transform time: 3.328 ms.
+I0824 19:08:21.795238  7193 data_layer.cpp:73] Restarting data prefetching from start.
+I0824 19:08:21.795250  7193 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:21.795258  7193 data_layer.cpp:129]      Read time: 0.151 ms.
+I0824 19:08:21.795275  7193 data_layer.cpp:130] Transform time: 3.16 ms.
+I0824 19:08:21.866431  7193 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:21.866447  7193 data_layer.cpp:129]      Read time: 0.141 ms.
+I0824 19:08:21.866451  7193 data_layer.cpp:130] Transform time: 2.999 ms.
+I0824 19:08:21.933185  7193 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:21.933202  7193 data_layer.cpp:129]      Read time: 0.127 ms.
+I0824 19:08:21.933241  7193 data_layer.cpp:130] Transform time: 2.959 ms.
+I0824 19:08:22.002487  7193 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:22.002504  7193 data_layer.cpp:129]      Read time: 0.141 ms.
+I0824 19:08:22.002507  7193 data_layer.cpp:130] Transform time: 3.137 ms.
+I0824 19:08:22.035483  7187 solver.cpp:397]     Test net output #0: accuracy = 0.1
+I0824 19:08:22.035502  7187 solver.cpp:397]     Test net output #1: loss = 2.30258 (* 1 = 2.30258 loss)
+I0824 19:08:22.367748  7187 solver.cpp:218] Iteration 0 (-1.13608e-36 iter/s, 6.26499s/200 iters), loss = 2.30259
+I0824 19:08:22.367791  7187 solver.cpp:237]     Train net output #0: loss = 2.30259 (* 1 = 2.30259 loss)
+I0824 19:08:22.367806  7187 sgd_solver.cpp:105] Iteration 0, lr = 0.001
+I0824 19:08:22.381999  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:22.382012  7192 data_layer.cpp:129]      Read time: 0.157 ms.
+I0824 19:08:22.382016  7192 data_layer.cpp:130] Transform time: 3.569 ms.
+I0824 19:08:22.612143  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:22.612159  7192 data_layer.cpp:129]      Read time: 0.147 ms.
+I0824 19:08:22.612162  7192 data_layer.cpp:130] Transform time: 3.537 ms.
+I0824 19:08:22.838335  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:22.838346  7192 data_layer.cpp:129]      Read time: 0.141 ms.
+I0824 19:08:22.838349  7192 data_layer.cpp:130] Transform time: 3.615 ms.
+I0824 19:08:23.063261  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:23.063272  7192 data_layer.cpp:129]      Read time: 0.144 ms.
+I0824 19:08:23.063275  7192 data_layer.cpp:130] Transform time: 3.591 ms.
+I0824 19:08:23.288947  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:23.288961  7192 data_layer.cpp:129]      Read time: 0.151 ms.
+I0824 19:08:23.288964  7192 data_layer.cpp:130] Transform time: 3.583 ms.
+I0824 19:08:23.514173  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:23.514189  7192 data_layer.cpp:129]      Read time: 0.151 ms.
+I0824 19:08:23.514192  7192 data_layer.cpp:130] Transform time: 3.599 ms.
+I0824 19:08:23.739290  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:23.739301  7192 data_layer.cpp:129]      Read time: 0.141 ms.
+I0824 19:08:23.739305  7192 data_layer.cpp:130] Transform time: 3.609 ms.
+I0824 19:08:23.964664  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:23.964674  7192 data_layer.cpp:129]      Read time: 0.139 ms.
+I0824 19:08:23.964679  7192 data_layer.cpp:130] Transform time: 3.52 ms.
+I0824 19:08:24.189752  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:24.189761  7192 data_layer.cpp:129]      Read time: 0.148 ms.
+I0824 19:08:24.189792  7192 data_layer.cpp:130] Transform time: 3.548 ms.
+I0824 19:08:24.414965  7192 data_layer.cpp:128] Prefetch batch: 4 ms.
+I0824 19:08:24.414976  7192 data_layer.cpp:129]      Read time: 0.169 ms.
+I0824 19:08:24.414979  7192 data_layer.cpp:130] Transform time: 3.699 ms.
+I0824 19:08:24.640362  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:24.640377  7192 data_layer.cpp:129]      Read time: 0.145 ms.
+I0824 19:08:24.640380  7192 data_layer.cpp:130] Transform time: 3.514 ms.
+I0824 19:08:24.865723  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:24.865734  7192 data_layer.cpp:129]      Read time: 0.149 ms.
+I0824 19:08:24.865738  7192 data_layer.cpp:130] Transform time: 3.633 ms.
+I0824 19:08:25.090905  7192 data_layer.cpp:128] Prefetch batch: 4 ms.
+I0824 19:08:25.090919  7192 data_layer.cpp:129]      Read time: 0.152 ms.
+I0824 19:08:25.090924  7192 data_layer.cpp:130] Transform time: 3.705 ms.
+I0824 19:08:25.317279  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:25.317296  7192 data_layer.cpp:129]      Read time: 0.146 ms.
+I0824 19:08:25.317298  7192 data_layer.cpp:130] Transform time: 3.533 ms.
+I0824 19:08:25.541875  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:25.541887  7192 data_layer.cpp:129]      Read time: 0.146 ms.
+I0824 19:08:25.541889  7192 data_layer.cpp:130] Transform time: 3.553 ms.
+I0824 19:08:25.767457  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:25.767475  7192 data_layer.cpp:129]      Read time: 0.14 ms.
+I0824 19:08:25.767478  7192 data_layer.cpp:130] Transform time: 3.517 ms.
+I0824 19:08:25.992679  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:25.992691  7192 data_layer.cpp:129]      Read time: 0.146 ms.
+I0824 19:08:25.992694  7192 data_layer.cpp:130] Transform time: 3.532 ms.
+I0824 19:08:26.217830  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:26.217842  7192 data_layer.cpp:129]      Read time: 0.142 ms.
+I0824 19:08:26.217846  7192 data_layer.cpp:130] Transform time: 3.631 ms.
+I0824 19:08:26.443254  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:26.443267  7192 data_layer.cpp:129]      Read time: 0.156 ms.
+I0824 19:08:26.443270  7192 data_layer.cpp:130] Transform time: 3.518 ms.
+I0824 19:08:26.668671  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:26.668681  7192 data_layer.cpp:129]      Read time: 0.147 ms.
+I0824 19:08:26.668684  7192 data_layer.cpp:130] Transform time: 3.535 ms.
+I0824 19:08:26.893901  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:26.893911  7192 data_layer.cpp:129]      Read time: 0.148 ms.
+I0824 19:08:26.893914  7192 data_layer.cpp:130] Transform time: 3.599 ms.
+I0824 19:08:27.120754  7192 data_layer.cpp:128] Prefetch batch: 5 ms.
+I0824 19:08:27.120771  7192 data_layer.cpp:129]      Read time: 0.252 ms.
+I0824 19:08:27.120776  7192 data_layer.cpp:130] Transform time: 4.958 ms.
+I0824 19:08:27.344297  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:27.344308  7192 data_layer.cpp:129]      Read time: 0.151 ms.
+I0824 19:08:27.344312  7192 data_layer.cpp:130] Transform time: 3.568 ms.
+I0824 19:08:27.569844  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:27.569860  7192 data_layer.cpp:129]      Read time: 0.14 ms.
+I0824 19:08:27.569864  7192 data_layer.cpp:130] Transform time: 3.519 ms.
+I0824 19:08:27.795143  7192 data_layer.cpp:128] Prefetch batch: 4 ms.
+I0824 19:08:27.795156  7192 data_layer.cpp:129]      Read time: 0.144 ms.
+I0824 19:08:27.795174  7192 data_layer.cpp:130] Transform time: 3.73 ms.
+I0824 19:08:28.019922  7192 data_layer.cpp:128] Prefetch batch: 4 ms.
+I0824 19:08:28.019935  7192 data_layer.cpp:129]      Read time: 0.149 ms.
+I0824 19:08:28.019938  7192 data_layer.cpp:130] Transform time: 3.717 ms.
+I0824 19:08:28.244829  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:28.244844  7192 data_layer.cpp:129]      Read time: 0.148 ms.
+I0824 19:08:28.244863  7192 data_layer.cpp:130] Transform time: 3.239 ms.
+I0824 19:08:28.469801  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:28.469825  7192 data_layer.cpp:129]      Read time: 0.144 ms.
+I0824 19:08:28.469843  7192 data_layer.cpp:130] Transform time: 3.602 ms.
+I0824 19:08:28.696175  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:28.696187  7192 data_layer.cpp:129]      Read time: 0.141 ms.
+I0824 19:08:28.696205  7192 data_layer.cpp:130] Transform time: 3.533 ms.
+I0824 19:08:28.920661  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:28.920670  7192 data_layer.cpp:129]      Read time: 0.144 ms.
+I0824 19:08:28.920688  7192 data_layer.cpp:130] Transform time: 3.551 ms.
+I0824 19:08:29.145939  7192 data_layer.cpp:128] Prefetch batch: 4 ms.
+I0824 19:08:29.145953  7192 data_layer.cpp:129]      Read time: 0.145 ms.
+I0824 19:08:29.145957  7192 data_layer.cpp:130] Transform time: 3.716 ms.
+I0824 19:08:29.371253  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:29.371263  7192 data_layer.cpp:129]      Read time: 0.15 ms.
+I0824 19:08:29.371279  7192 data_layer.cpp:130] Transform time: 3.593 ms.
+I0824 19:08:29.596626  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:29.596635  7192 data_layer.cpp:129]      Read time: 0.145 ms.
+I0824 19:08:29.596653  7192 data_layer.cpp:130] Transform time: 3.577 ms.
+I0824 19:08:29.822132  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:29.822147  7192 data_layer.cpp:129]      Read time: 0.141 ms.
+I0824 19:08:29.822165  7192 data_layer.cpp:130] Transform time: 3.561 ms.
+I0824 19:08:30.047231  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:30.047242  7192 data_layer.cpp:129]      Read time: 0.156 ms.
+I0824 19:08:30.047260  7192 data_layer.cpp:130] Transform time: 3.518 ms.
+I0824 19:08:30.272814  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:30.272828  7192 data_layer.cpp:129]      Read time: 0.153 ms.
+I0824 19:08:30.272846  7192 data_layer.cpp:130] Transform time: 3.538 ms.
+I0824 19:08:30.498296  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:30.498312  7192 data_layer.cpp:129]      Read time: 0.157 ms.
+I0824 19:08:30.498330  7192 data_layer.cpp:130] Transform time: 3.553 ms.
+I0824 19:08:30.723850  7192 data_layer.cpp:128] Prefetch batch: 4 ms.
+I0824 19:08:30.723865  7192 data_layer.cpp:129]      Read time: 0.147 ms.
+I0824 19:08:30.723883  7192 data_layer.cpp:130] Transform time: 3.943 ms.
+I0824 19:08:30.949040  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:30.949054  7192 data_layer.cpp:129]      Read time: 0.146 ms.
+I0824 19:08:30.949071  7192 data_layer.cpp:130] Transform time: 3.551 ms.
+I0824 19:08:31.174589  7192 data_layer.cpp:128] Prefetch batch: 4 ms.
+I0824 19:08:31.174602  7192 data_layer.cpp:129]      Read time: 0.147 ms.
+I0824 19:08:31.174605  7192 data_layer.cpp:130] Transform time: 3.74 ms.
+I0824 19:08:31.399603  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:31.399616  7192 data_layer.cpp:129]      Read time: 0.157 ms.
+I0824 19:08:31.399619  7192 data_layer.cpp:130] Transform time: 3.393 ms.
+I0824 19:08:31.625715  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:31.625727  7192 data_layer.cpp:129]      Read time: 0.148 ms.
+I0824 19:08:31.625746  7192 data_layer.cpp:130] Transform time: 3.515 ms.
+I0824 19:08:31.851233  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:31.851243  7192 data_layer.cpp:129]      Read time: 0.138 ms.
+I0824 19:08:31.851260  7192 data_layer.cpp:130] Transform time: 3.54 ms.
+I0824 19:08:32.076696  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:32.076710  7192 data_layer.cpp:129]      Read time: 0.146 ms.
+I0824 19:08:32.076728  7192 data_layer.cpp:130] Transform time: 3.611 ms.
+I0824 19:08:32.302268  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:32.302279  7192 data_layer.cpp:129]      Read time: 0.144 ms.
+I0824 19:08:32.302297  7192 data_layer.cpp:130] Transform time: 3.617 ms.
+I0824 19:08:32.527894  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:32.527907  7192 data_layer.cpp:129]      Read time: 0.139 ms.
+I0824 19:08:32.527925  7192 data_layer.cpp:130] Transform time: 3.55 ms.
+I0824 19:08:32.753494  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:32.753535  7192 data_layer.cpp:129]      Read time: 0.138 ms.
+I0824 19:08:32.753540  7192 data_layer.cpp:130] Transform time: 3.54 ms.
+I0824 19:08:32.979049  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:32.979065  7192 data_layer.cpp:129]      Read time: 0.152 ms.
+I0824 19:08:32.979084  7192 data_layer.cpp:130] Transform time: 3.541 ms.
+I0824 19:08:33.204097  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:33.204109  7192 data_layer.cpp:129]      Read time: 0.146 ms.
+I0824 19:08:33.204126  7192 data_layer.cpp:130] Transform time: 3.577 ms.
+I0824 19:08:33.429772  7192 data_layer.cpp:128] Prefetch batch: 4 ms.
+I0824 19:08:33.429783  7192 data_layer.cpp:129]      Read time: 0.143 ms.
+I0824 19:08:33.429800  7192 data_layer.cpp:130] Transform time: 4.064 ms.
+I0824 19:08:33.654577  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:33.654588  7192 data_layer.cpp:129]      Read time: 0.148 ms.
+I0824 19:08:33.654606  7192 data_layer.cpp:130] Transform time: 3.546 ms.
+I0824 19:08:33.879652  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:33.879662  7192 data_layer.cpp:129]      Read time: 0.158 ms.
+I0824 19:08:33.879680  7192 data_layer.cpp:130] Transform time: 3.602 ms.
+I0824 19:08:34.104432  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:34.104444  7192 data_layer.cpp:129]      Read time: 0.158 ms.
+I0824 19:08:34.104460  7192 data_layer.cpp:130] Transform time: 3.52 ms.
+I0824 19:08:34.329792  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:34.329802  7192 data_layer.cpp:129]      Read time: 0.149 ms.
+I0824 19:08:34.329819  7192 data_layer.cpp:130] Transform time: 3.576 ms.
+I0824 19:08:34.555001  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:34.555012  7192 data_layer.cpp:129]      Read time: 0.156 ms.
+I0824 19:08:34.555030  7192 data_layer.cpp:130] Transform time: 3.524 ms.
+I0824 19:08:34.780434  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:34.780449  7192 data_layer.cpp:129]      Read time: 0.146 ms.
+I0824 19:08:34.780467  7192 data_layer.cpp:130] Transform time: 3.516 ms.
+I0824 19:08:35.008903  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:35.008913  7192 data_layer.cpp:129]      Read time: 0.146 ms.
+I0824 19:08:35.008930  7192 data_layer.cpp:130] Transform time: 2.954 ms.
+I0824 19:08:35.234364  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:35.234376  7192 data_layer.cpp:129]      Read time: 0.151 ms.
+I0824 19:08:35.234395  7192 data_layer.cpp:130] Transform time: 3.619 ms.
+I0824 19:08:35.459812  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:35.459826  7192 data_layer.cpp:129]      Read time: 0.146 ms.
+I0824 19:08:35.459844  7192 data_layer.cpp:130] Transform time: 3.565 ms.
+I0824 19:08:35.685173  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:35.685183  7192 data_layer.cpp:129]      Read time: 0.144 ms.
+I0824 19:08:35.685199  7192 data_layer.cpp:130] Transform time: 3.579 ms.
+I0824 19:08:35.910156  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:35.910166  7192 data_layer.cpp:129]      Read time: 0.142 ms.
+I0824 19:08:35.910183  7192 data_layer.cpp:130] Transform time: 3.608 ms.
+I0824 19:08:36.135085  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:36.135095  7192 data_layer.cpp:129]      Read time: 0.157 ms.
+I0824 19:08:36.135114  7192 data_layer.cpp:130] Transform time: 3.309 ms.
+I0824 19:08:36.360477  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:36.360488  7192 data_layer.cpp:129]      Read time: 0.148 ms.
+I0824 19:08:36.360505  7192 data_layer.cpp:130] Transform time: 3.582 ms.
+I0824 19:08:36.585521  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:36.585531  7192 data_layer.cpp:129]      Read time: 0.14 ms.
+I0824 19:08:36.585548  7192 data_layer.cpp:130] Transform time: 3.598 ms.
+I0824 19:08:36.810500  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:36.810511  7192 data_layer.cpp:129]      Read time: 0.137 ms.
+I0824 19:08:36.810529  7192 data_layer.cpp:130] Transform time: 3.546 ms.
+I0824 19:08:37.035827  7192 data_layer.cpp:128] Prefetch batch: 4 ms.
+I0824 19:08:37.035838  7192 data_layer.cpp:129]      Read time: 0.152 ms.
+I0824 19:08:37.035856  7192 data_layer.cpp:130] Transform time: 3.903 ms.
+I0824 19:08:37.260638  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:37.260651  7192 data_layer.cpp:129]      Read time: 0.158 ms.
+I0824 19:08:37.260669  7192 data_layer.cpp:130] Transform time: 3.556 ms.
+I0824 19:08:37.485669  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:37.485679  7192 data_layer.cpp:129]      Read time: 0.151 ms.
+I0824 19:08:37.485697  7192 data_layer.cpp:130] Transform time: 3.562 ms.
+I0824 19:08:37.710870  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:37.710880  7192 data_layer.cpp:129]      Read time: 0.152 ms.
+I0824 19:08:37.710897  7192 data_layer.cpp:130] Transform time: 3.606 ms.
+I0824 19:08:37.936770  7192 data_layer.cpp:128] Prefetch batch: 4 ms.
+I0824 19:08:37.936784  7192 data_layer.cpp:129]      Read time: 0.15 ms.
+I0824 19:08:37.936802  7192 data_layer.cpp:130] Transform time: 3.991 ms.
+I0824 19:08:38.161655  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:38.161666  7192 data_layer.cpp:129]      Read time: 0.141 ms.
+I0824 19:08:38.161684  7192 data_layer.cpp:130] Transform time: 3.595 ms.
+I0824 19:08:38.386811  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:38.386821  7192 data_layer.cpp:129]      Read time: 0.157 ms.
+I0824 19:08:38.386838  7192 data_layer.cpp:130] Transform time: 3.662 ms.
+I0824 19:08:38.612315  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:38.612325  7192 data_layer.cpp:129]      Read time: 0.149 ms.
+I0824 19:08:38.612344  7192 data_layer.cpp:130] Transform time: 3.55 ms.
+I0824 19:08:38.836807  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:38.836815  7192 data_layer.cpp:129]      Read time: 0.14 ms.
+I0824 19:08:38.836833  7192 data_layer.cpp:130] Transform time: 3.529 ms.
+I0824 19:08:39.061908  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:39.061923  7192 data_layer.cpp:129]      Read time: 0.148 ms.
+I0824 19:08:39.061940  7192 data_layer.cpp:130] Transform time: 3.529 ms.
+I0824 19:08:39.287159  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:39.287170  7192 data_layer.cpp:129]      Read time: 0.142 ms.
+I0824 19:08:39.287187  7192 data_layer.cpp:130] Transform time: 3.617 ms.
+I0824 19:08:39.512091  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:39.512101  7192 data_layer.cpp:129]      Read time: 0.148 ms.
+I0824 19:08:39.512120  7192 data_layer.cpp:130] Transform time: 3.544 ms.
+I0824 19:08:39.737293  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:39.737304  7192 data_layer.cpp:129]      Read time: 0.15 ms.
+I0824 19:08:39.737323  7192 data_layer.cpp:130] Transform time: 3.536 ms.
+I0824 19:08:39.962254  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:39.962263  7192 data_layer.cpp:129]      Read time: 0.14 ms.
+I0824 19:08:39.962280  7192 data_layer.cpp:130] Transform time: 3.603 ms.
+I0824 19:08:40.187737  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:40.187752  7192 data_layer.cpp:129]      Read time: 0.147 ms.
+I0824 19:08:40.187770  7192 data_layer.cpp:130] Transform time: 3.489 ms.
+I0824 19:08:40.416435  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:40.416450  7192 data_layer.cpp:129]      Read time: 0.152 ms.
+I0824 19:08:40.416468  7192 data_layer.cpp:130] Transform time: 3.653 ms.
+I0824 19:08:40.642881  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:40.642899  7192 data_layer.cpp:129]      Read time: 0.151 ms.
+I0824 19:08:40.642916  7192 data_layer.cpp:130] Transform time: 3.57 ms.
+I0824 19:08:40.869395  7192 data_layer.cpp:128] Prefetch batch: 4 ms.
+I0824 19:08:40.869408  7192 data_layer.cpp:129]      Read time: 0.164 ms.
+I0824 19:08:40.869426  7192 data_layer.cpp:130] Transform time: 3.958 ms.
+I0824 19:08:41.095484  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:41.095499  7192 data_layer.cpp:129]      Read time: 0.151 ms.
+I0824 19:08:41.095517  7192 data_layer.cpp:130] Transform time: 3.578 ms.
+I0824 19:08:41.321684  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:41.321699  7192 data_layer.cpp:129]      Read time: 0.157 ms.
+I0824 19:08:41.321717  7192 data_layer.cpp:130] Transform time: 3.591 ms.
+I0824 19:08:41.547834  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:41.547849  7192 data_layer.cpp:129]      Read time: 0.152 ms.
+I0824 19:08:41.547866  7192 data_layer.cpp:130] Transform time: 3.582 ms.
+I0824 19:08:41.774350  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:41.774365  7192 data_layer.cpp:129]      Read time: 0.144 ms.
+I0824 19:08:41.774384  7192 data_layer.cpp:130] Transform time: 3.582 ms.
+I0824 19:08:42.000866  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:42.000880  7192 data_layer.cpp:129]      Read time: 0.155 ms.
+I0824 19:08:42.000898  7192 data_layer.cpp:130] Transform time: 3.589 ms.
+I0824 19:08:42.227128  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:42.227144  7192 data_layer.cpp:129]      Read time: 0.146 ms.
+I0824 19:08:42.227147  7192 data_layer.cpp:130] Transform time: 3.524 ms.
+I0824 19:08:42.453254  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:42.453269  7192 data_layer.cpp:129]      Read time: 0.151 ms.
+I0824 19:08:42.453286  7192 data_layer.cpp:130] Transform time: 3.526 ms.
+I0824 19:08:42.679998  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:42.680012  7192 data_layer.cpp:129]      Read time: 0.145 ms.
+I0824 19:08:42.680030  7192 data_layer.cpp:130] Transform time: 3.512 ms.
+I0824 19:08:42.905983  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:42.905998  7192 data_layer.cpp:129]      Read time: 0.149 ms.
+I0824 19:08:42.906016  7192 data_layer.cpp:130] Transform time: 3.577 ms.
+I0824 19:08:43.132033  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:43.132046  7192 data_layer.cpp:129]      Read time: 0.154 ms.
+I0824 19:08:43.132064  7192 data_layer.cpp:130] Transform time: 3.638 ms.
+I0824 19:08:43.358780  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:43.358796  7192 data_layer.cpp:129]      Read time: 0.149 ms.
+I0824 19:08:43.358814  7192 data_layer.cpp:130] Transform time: 3.588 ms.
+I0824 19:08:43.585186  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:43.585201  7192 data_layer.cpp:129]      Read time: 0.145 ms.
+I0824 19:08:43.585230  7192 data_layer.cpp:130] Transform time: 3.522 ms.
+I0824 19:08:43.812470  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:43.812636  7192 data_layer.cpp:129]      Read time: 0.14 ms.
+I0824 19:08:43.812644  7192 data_layer.cpp:130] Transform time: 3.462 ms.
+I0824 19:08:44.037559  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:44.037569  7192 data_layer.cpp:129]      Read time: 0.16 ms.
+I0824 19:08:44.037572  7192 data_layer.cpp:130] Transform time: 3.6 ms.
+I0824 19:08:44.263470  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:44.263481  7192 data_layer.cpp:129]      Read time: 0.147 ms.
+I0824 19:08:44.263499  7192 data_layer.cpp:130] Transform time: 3.559 ms.
+I0824 19:08:44.490402  7192 data_layer.cpp:128] Prefetch batch: 4 ms.
+I0824 19:08:44.490418  7192 data_layer.cpp:129]      Read time: 0.203 ms.
+I0824 19:08:44.490437  7192 data_layer.cpp:130] Transform time: 3.853 ms.
+I0824 19:08:44.716495  7192 data_layer.cpp:128] Prefetch batch: 4 ms.
+I0824 19:08:44.716507  7192 data_layer.cpp:129]      Read time: 0.154 ms.
+I0824 19:08:44.716526  7192 data_layer.cpp:130] Transform time: 3.896 ms.
+I0824 19:08:44.944279  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:44.944294  7192 data_layer.cpp:129]      Read time: 0.155 ms.
+I0824 19:08:44.944313  7192 data_layer.cpp:130] Transform time: 3.546 ms.
+I0824 19:08:45.169678  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:45.169693  7192 data_layer.cpp:129]      Read time: 0.151 ms.
+I0824 19:08:45.169710  7192 data_layer.cpp:130] Transform time: 2.942 ms.
+I0824 19:08:45.397505  7192 data_layer.cpp:128] Prefetch batch: 4 ms.
+I0824 19:08:45.397516  7192 data_layer.cpp:129]      Read time: 0.169 ms.
+I0824 19:08:45.397533  7192 data_layer.cpp:130] Transform time: 3.942 ms.
+I0824 19:08:45.622550  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:45.622562  7192 data_layer.cpp:129]      Read time: 0.148 ms.
+I0824 19:08:45.622581  7192 data_layer.cpp:130] Transform time: 3.541 ms.
+I0824 19:08:45.847743  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:45.847757  7192 data_layer.cpp:129]      Read time: 0.141 ms.
+I0824 19:08:45.847774  7192 data_layer.cpp:130] Transform time: 3.524 ms.
+I0824 19:08:46.075153  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:46.075168  7192 data_layer.cpp:129]      Read time: 0.15 ms.
+I0824 19:08:46.075186  7192 data_layer.cpp:130] Transform time: 3.517 ms.
+I0824 19:08:46.301829  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:46.301846  7192 data_layer.cpp:129]      Read time: 0.148 ms.
+I0824 19:08:46.301862  7192 data_layer.cpp:130] Transform time: 3.568 ms.
+I0824 19:08:46.528118  7192 data_layer.cpp:128] Prefetch batch: 4 ms.
+I0824 19:08:46.528133  7192 data_layer.cpp:129]      Read time: 0.167 ms.
+I0824 19:08:46.528151  7192 data_layer.cpp:130] Transform time: 3.746 ms.
+I0824 19:08:46.754369  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:46.754384  7192 data_layer.cpp:129]      Read time: 0.147 ms.
+I0824 19:08:46.754401  7192 data_layer.cpp:130] Transform time: 3.611 ms.
+I0824 19:08:46.980214  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:46.980228  7192 data_layer.cpp:129]      Read time: 0.138 ms.
+I0824 19:08:46.980247  7192 data_layer.cpp:130] Transform time: 3.532 ms.
+I0824 19:08:47.207594  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:47.207610  7192 data_layer.cpp:129]      Read time: 0.148 ms.
+I0824 19:08:47.207628  7192 data_layer.cpp:130] Transform time: 3.546 ms.
+I0824 19:08:47.435081  7192 data_layer.cpp:128] Prefetch batch: 4 ms.
+I0824 19:08:47.435096  7192 data_layer.cpp:129]      Read time: 0.152 ms.
+I0824 19:08:47.435113  7192 data_layer.cpp:130] Transform time: 3.721 ms.
+I0824 19:08:47.661141  7192 data_layer.cpp:128] Prefetch batch: 4 ms.
+I0824 19:08:47.661156  7192 data_layer.cpp:129]      Read time: 0.15 ms.
+I0824 19:08:47.661173  7192 data_layer.cpp:130] Transform time: 3.89 ms.
+I0824 19:08:47.887104  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:47.887117  7192 data_layer.cpp:129]      Read time: 0.155 ms.
+I0824 19:08:47.887135  7192 data_layer.cpp:130] Transform time: 3.56 ms.
+I0824 19:08:48.113778  7192 data_layer.cpp:128] Prefetch batch: 4 ms.
+I0824 19:08:48.113827  7192 data_layer.cpp:129]      Read time: 0.154 ms.
+I0824 19:08:48.113831  7192 data_layer.cpp:130] Transform time: 4.114 ms.
+I0824 19:08:48.339776  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:48.339790  7192 data_layer.cpp:129]      Read time: 0.147 ms.
+I0824 19:08:48.339808  7192 data_layer.cpp:130] Transform time: 3.524 ms.
+I0824 19:08:48.565603  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:48.565618  7192 data_layer.cpp:129]      Read time: 0.143 ms.
+I0824 19:08:48.565635  7192 data_layer.cpp:130] Transform time: 3.617 ms.
+I0824 19:08:48.791738  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:48.791754  7192 data_layer.cpp:129]      Read time: 0.147 ms.
+I0824 19:08:48.791770  7192 data_layer.cpp:130] Transform time: 3.506 ms.
+I0824 19:08:49.018085  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:49.018100  7192 data_layer.cpp:129]      Read time: 0.157 ms.
+I0824 19:08:49.018118  7192 data_layer.cpp:130] Transform time: 3.596 ms.
+I0824 19:08:49.240459  7192 data_layer.cpp:128] Prefetch batch: 8 ms.
+I0824 19:08:49.240474  7192 data_layer.cpp:129]      Read time: 0.144 ms.
+I0824 19:08:49.240492  7192 data_layer.cpp:130] Transform time: 8.164 ms.
+I0824 19:08:49.486515  7192 data_layer.cpp:128] Prefetch batch: 4 ms.
+I0824 19:08:49.486531  7192 data_layer.cpp:129]      Read time: 0.156 ms.
+I0824 19:08:49.486548  7192 data_layer.cpp:130] Transform time: 3.97 ms.
+I0824 19:08:49.738412  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:08:49.738422  7192 data_layer.cpp:129]      Read time: 0.145 ms.
+I0824 19:08:49.738440  7192 data_layer.cpp:130] Transform time: 9.775 ms.
+I0824 19:08:49.988906  7192 data_layer.cpp:128] Prefetch batch: 8 ms.
+I0824 19:08:49.988917  7192 data_layer.cpp:129]      Read time: 0.137 ms.
+I0824 19:08:49.988935  7192 data_layer.cpp:130] Transform time: 7.866 ms.
+I0824 19:08:50.242281  7192 data_layer.cpp:128] Prefetch batch: 8 ms.
+I0824 19:08:50.242296  7192 data_layer.cpp:129]      Read time: 0.156 ms.
+I0824 19:08:50.242314  7192 data_layer.cpp:130] Transform time: 8.603 ms.
+I0824 19:08:50.499217  7192 data_layer.cpp:128] Prefetch batch: 13 ms.
+I0824 19:08:50.499230  7192 data_layer.cpp:129]      Read time: 0.152 ms.
+I0824 19:08:50.499248  7192 data_layer.cpp:130] Transform time: 12.783 ms.
+I0824 19:08:50.744396  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:50.744411  7192 data_layer.cpp:129]      Read time: 0.145 ms.
+I0824 19:08:50.744415  7192 data_layer.cpp:130] Transform time: 3.003 ms.
+I0824 19:08:50.989346  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:50.989362  7192 data_layer.cpp:129]      Read time: 0.143 ms.
+I0824 19:08:50.989380  7192 data_layer.cpp:130] Transform time: 3.005 ms.
+I0824 19:08:51.234421  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:51.234436  7192 data_layer.cpp:129]      Read time: 0.141 ms.
+I0824 19:08:51.234453  7192 data_layer.cpp:130] Transform time: 3.039 ms.
+I0824 19:08:51.479539  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:51.479554  7192 data_layer.cpp:129]      Read time: 0.146 ms.
+I0824 19:08:51.479573  7192 data_layer.cpp:130] Transform time: 3.012 ms.
+I0824 19:08:51.724736  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:51.724751  7192 data_layer.cpp:129]      Read time: 0.141 ms.
+I0824 19:08:51.724769  7192 data_layer.cpp:130] Transform time: 2.941 ms.
+I0824 19:08:51.969015  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:51.969032  7192 data_layer.cpp:129]      Read time: 0.161 ms.
+I0824 19:08:51.969049  7192 data_layer.cpp:130] Transform time: 2.931 ms.
+I0824 19:08:52.215435  7192 data_layer.cpp:128] Prefetch batch: 4 ms.
+I0824 19:08:52.215451  7192 data_layer.cpp:129]      Read time: 0.143 ms.
+I0824 19:08:52.215469  7192 data_layer.cpp:130] Transform time: 3.983 ms.
+I0824 19:08:52.467229  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:08:52.467242  7192 data_layer.cpp:129]      Read time: 0.16 ms.
+I0824 19:08:52.467244  7192 data_layer.cpp:130] Transform time: 9.762 ms.
+I0824 19:08:52.718138  7192 data_layer.cpp:128] Prefetch batch: 8 ms.
+I0824 19:08:52.718152  7192 data_layer.cpp:129]      Read time: 0.157 ms.
+I0824 19:08:52.718169  7192 data_layer.cpp:130] Transform time: 8.15 ms.
+I0824 19:08:52.971365  7192 data_layer.cpp:128] Prefetch batch: 8 ms.
+I0824 19:08:52.971379  7192 data_layer.cpp:129]      Read time: 0.148 ms.
+I0824 19:08:52.971396  7192 data_layer.cpp:130] Transform time: 8.119 ms.
+I0824 19:08:53.225105  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:08:53.225118  7192 data_layer.cpp:129]      Read time: 0.144 ms.
+I0824 19:08:53.225136  7192 data_layer.cpp:130] Transform time: 9.732 ms.
+I0824 19:08:53.472946  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:53.472961  7192 data_layer.cpp:129]      Read time: 0.145 ms.
+I0824 19:08:53.472980  7192 data_layer.cpp:130] Transform time: 3.628 ms.
+I0824 19:08:53.718466  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:53.718482  7192 data_layer.cpp:129]      Read time: 0.142 ms.
+I0824 19:08:53.718499  7192 data_layer.cpp:130] Transform time: 3.038 ms.
+I0824 19:08:53.963188  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:08:53.963203  7192 data_layer.cpp:129]      Read time: 0.14 ms.
+I0824 19:08:53.963222  7192 data_layer.cpp:130] Transform time: 2.963 ms.
+I0824 19:08:54.209123  7192 data_layer.cpp:128] Prefetch batch: 4 ms.
+I0824 19:08:54.209141  7192 data_layer.cpp:129]      Read time: 0.148 ms.
+I0824 19:08:54.209143  7192 data_layer.cpp:130] Transform time: 3.93 ms.
+I0824 19:08:54.464089  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:08:54.464102  7192 data_layer.cpp:129]      Read time: 0.15 ms.
+I0824 19:08:54.464121  7192 data_layer.cpp:130] Transform time: 9.815 ms.
+I0824 19:08:54.723287  7192 data_layer.cpp:128] Prefetch batch: 13 ms.
+I0824 19:08:54.723304  7192 data_layer.cpp:129]      Read time: 0.149 ms.
+I0824 19:08:54.723321  7192 data_layer.cpp:130] Transform time: 13.294 ms.
+I0824 19:08:54.976117  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:08:54.976132  7192 data_layer.cpp:129]      Read time: 0.147 ms.
+I0824 19:08:54.976150  7192 data_layer.cpp:130] Transform time: 10.152 ms.
+I0824 19:08:55.230135  7192 data_layer.cpp:128] Prefetch batch: 4 ms.
+I0824 19:08:55.230151  7192 data_layer.cpp:129]      Read time: 0.151 ms.
+I0824 19:08:55.230170  7192 data_layer.cpp:130] Transform time: 3.784 ms.
+I0824 19:08:55.462122  7192 data_layer.cpp:128] Prefetch batch: 6 ms.
+I0824 19:08:55.462137  7192 data_layer.cpp:129]      Read time: 0.15 ms.
+I0824 19:08:55.462141  7192 data_layer.cpp:130] Transform time: 6.235 ms.
+I0824 19:08:55.694278  7192 data_layer.cpp:128] Prefetch batch: 5 ms.
+I0824 19:08:55.694293  7192 data_layer.cpp:129]      Read time: 0.149 ms.
+I0824 19:08:55.694310  7192 data_layer.cpp:130] Transform time: 5.37 ms.
+I0824 19:08:55.928169  7192 data_layer.cpp:128] Prefetch batch: 7 ms.
+I0824 19:08:55.928185  7192 data_layer.cpp:129]      Read time: 0.147 ms.
+I0824 19:08:55.928203  7192 data_layer.cpp:130] Transform time: 7.479 ms.
+I0824 19:08:56.162256  7192 data_layer.cpp:128] Prefetch batch: 9 ms.
+I0824 19:08:56.162274  7192 data_layer.cpp:129]      Read time: 0.143 ms.
+I0824 19:08:56.162292  7192 data_layer.cpp:130] Transform time: 9.481 ms.
+I0824 19:08:56.394616  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:08:56.394631  7192 data_layer.cpp:129]      Read time: 0.153 ms.
+I0824 19:08:56.394649  7192 data_layer.cpp:130] Transform time: 9.808 ms.
+I0824 19:08:56.626477  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:08:56.626492  7192 data_layer.cpp:129]      Read time: 0.154 ms.
+I0824 19:08:56.626509  7192 data_layer.cpp:130] Transform time: 10.021 ms.
+I0824 19:08:56.860690  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:08:56.860707  7192 data_layer.cpp:129]      Read time: 0.157 ms.
+I0824 19:08:56.860723  7192 data_layer.cpp:130] Transform time: 9.657 ms.
+I0824 19:08:57.093010  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:08:57.093026  7192 data_layer.cpp:129]      Read time: 0.149 ms.
+I0824 19:08:57.093044  7192 data_layer.cpp:130] Transform time: 10.086 ms.
+I0824 19:08:57.326617  7192 data_layer.cpp:128] Prefetch batch: 12 ms.
+I0824 19:08:57.326632  7192 data_layer.cpp:129]      Read time: 0.158 ms.
+I0824 19:08:57.326637  7192 data_layer.cpp:130] Transform time: 12.457 ms.
+I0824 19:08:57.554064  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:08:57.554076  7192 data_layer.cpp:129]      Read time: 0.144 ms.
+I0824 19:08:57.554093  7192 data_layer.cpp:130] Transform time: 9.819 ms.
+I0824 19:08:57.784817  7192 data_layer.cpp:128] Prefetch batch: 14 ms.
+I0824 19:08:57.784834  7192 data_layer.cpp:129]      Read time: 0.165 ms.
+I0824 19:08:57.784838  7192 data_layer.cpp:130] Transform time: 14.533 ms.
+I0824 19:08:58.013883  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:08:58.013900  7192 data_layer.cpp:129]      Read time: 0.153 ms.
+I0824 19:08:58.013903  7192 data_layer.cpp:130] Transform time: 9.812 ms.
+I0824 19:08:58.243558  7192 data_layer.cpp:128] Prefetch batch: 12 ms.
+I0824 19:08:58.243573  7192 data_layer.cpp:129]      Read time: 0.159 ms.
+I0824 19:08:58.243592  7192 data_layer.cpp:130] Transform time: 12.431 ms.
+I0824 19:08:58.473354  7192 data_layer.cpp:128] Prefetch batch: 12 ms.
+I0824 19:08:58.473374  7192 data_layer.cpp:129]      Read time: 0.152 ms.
+I0824 19:08:58.473395  7192 data_layer.cpp:130] Transform time: 12.085 ms.
+I0824 19:08:58.702246  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:08:58.702258  7192 data_layer.cpp:129]      Read time: 0.147 ms.
+I0824 19:08:58.702276  7192 data_layer.cpp:130] Transform time: 9.834 ms.
+I0824 19:08:58.927290  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:08:58.927300  7192 data_layer.cpp:129]      Read time: 0.137 ms.
+I0824 19:08:58.927319  7192 data_layer.cpp:130] Transform time: 9.916 ms.
+I0824 19:08:59.157109  7192 data_layer.cpp:128] Prefetch batch: 14 ms.
+I0824 19:08:59.157120  7192 data_layer.cpp:129]      Read time: 0.142 ms.
+I0824 19:08:59.157138  7192 data_layer.cpp:130] Transform time: 14.486 ms.
+I0824 19:08:59.385406  7192 data_layer.cpp:128] Prefetch batch: 12 ms.
+I0824 19:08:59.385422  7192 data_layer.cpp:129]      Read time: 0.162 ms.
+I0824 19:08:59.385426  7192 data_layer.cpp:130] Transform time: 12.496 ms.
+I0824 19:08:59.612469  7192 data_layer.cpp:128] Prefetch batch: 12 ms.
+I0824 19:08:59.612485  7192 data_layer.cpp:129]      Read time: 0.147 ms.
+I0824 19:08:59.612504  7192 data_layer.cpp:130] Transform time: 12.267 ms.
+I0824 19:08:59.832963  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:08:59.832975  7192 data_layer.cpp:129]      Read time: 0.142 ms.
+I0824 19:08:59.832993  7192 data_layer.cpp:130] Transform time: 9.829 ms.
+I0824 19:09:00.061638  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:09:00.061655  7192 data_layer.cpp:129]      Read time: 0.142 ms.
+I0824 19:09:00.061673  7192 data_layer.cpp:130] Transform time: 9.895 ms.
+I0824 19:09:00.293828  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:09:00.293844  7192 data_layer.cpp:129]      Read time: 0.144 ms.
+I0824 19:09:00.293848  7192 data_layer.cpp:130] Transform time: 10.135 ms.
+I0824 19:09:00.526154  7192 data_layer.cpp:128] Prefetch batch: 12 ms.
+I0824 19:09:00.526170  7192 data_layer.cpp:129]      Read time: 0.153 ms.
+I0824 19:09:00.526173  7192 data_layer.cpp:130] Transform time: 12.644 ms.
+I0824 19:09:00.754747  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:09:00.754765  7192 data_layer.cpp:129]      Read time: 0.172 ms.
+I0824 19:09:00.754767  7192 data_layer.cpp:130] Transform time: 10.528 ms.
+I0824 19:09:00.985699  7192 data_layer.cpp:128] Prefetch batch: 12 ms.
+I0824 19:09:00.985711  7192 data_layer.cpp:129]      Read time: 0.143 ms.
+I0824 19:09:00.985715  7192 data_layer.cpp:130] Transform time: 12.044 ms.
+I0824 19:09:01.211179  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:09:01.211191  7192 data_layer.cpp:129]      Read time: 0.143 ms.
+I0824 19:09:01.211194  7192 data_layer.cpp:130] Transform time: 9.746 ms.
+I0824 19:09:01.440583  7192 data_layer.cpp:128] Prefetch batch: 13 ms.
+I0824 19:09:01.440599  7192 data_layer.cpp:129]      Read time: 0.158 ms.
+I0824 19:09:01.440634  7192 data_layer.cpp:130] Transform time: 4.959 ms.
+I0824 19:09:01.666570  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:09:01.666584  7192 data_layer.cpp:129]      Read time: 0.148 ms.
+I0824 19:09:01.666586  7192 data_layer.cpp:130] Transform time: 9.863 ms.
+I0824 19:09:01.891507  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:09:01.891518  7192 data_layer.cpp:129]      Read time: 0.144 ms.
+I0824 19:09:01.891521  7192 data_layer.cpp:130] Transform time: 9.827 ms.
+I0824 19:09:02.117709  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:09:02.117722  7192 data_layer.cpp:129]      Read time: 0.145 ms.
+I0824 19:09:02.117727  7192 data_layer.cpp:130] Transform time: 9.837 ms.
+I0824 19:09:02.345010  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:09:02.345026  7192 data_layer.cpp:129]      Read time: 0.146 ms.
+I0824 19:09:02.345028  7192 data_layer.cpp:130] Transform time: 9.845 ms.
+I0824 19:09:02.569277  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:09:02.569294  7192 data_layer.cpp:129]      Read time: 0.157 ms.
+I0824 19:09:02.569298  7192 data_layer.cpp:130] Transform time: 9.777 ms.
+I0824 19:09:02.794986  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:09:02.794998  7192 data_layer.cpp:129]      Read time: 0.156 ms.
+I0824 19:09:02.795001  7192 data_layer.cpp:130] Transform time: 9.957 ms.
+I0824 19:09:03.019788  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:09:03.019800  7192 data_layer.cpp:129]      Read time: 0.151 ms.
+I0824 19:09:03.019804  7192 data_layer.cpp:130] Transform time: 9.769 ms.
+I0824 19:09:03.244338  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:09:03.244349  7192 data_layer.cpp:129]      Read time: 0.137 ms.
+I0824 19:09:03.244352  7192 data_layer.cpp:130] Transform time: 9.796 ms.
+I0824 19:09:03.469130  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:09:03.469141  7192 data_layer.cpp:129]      Read time: 0.137 ms.
+I0824 19:09:03.469144  7192 data_layer.cpp:130] Transform time: 9.83 ms.
+I0824 19:09:03.694159  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:09:03.694171  7192 data_layer.cpp:129]      Read time: 0.147 ms.
+I0824 19:09:03.694175  7192 data_layer.cpp:130] Transform time: 9.831 ms.
+I0824 19:09:03.919481  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:09:03.919497  7192 data_layer.cpp:129]      Read time: 0.14 ms.
+I0824 19:09:03.919499  7192 data_layer.cpp:130] Transform time: 9.793 ms.
+I0824 19:09:04.146838  7192 data_layer.cpp:128] Prefetch batch: 12 ms.
+I0824 19:09:04.146857  7192 data_layer.cpp:129]      Read time: 0.147 ms.
+I0824 19:09:04.146859  7192 data_layer.cpp:130] Transform time: 11.969 ms.
+I0824 19:09:04.371997  7192 data_layer.cpp:128] Prefetch batch: 9 ms.
+I0824 19:09:04.372010  7192 data_layer.cpp:129]      Read time: 0.149 ms.
+I0824 19:09:04.372014  7192 data_layer.cpp:130] Transform time: 9.467 ms.
+I0824 19:09:04.604146  7192 data_layer.cpp:128] Prefetch batch: 12 ms.
+I0824 19:09:04.604161  7192 data_layer.cpp:129]      Read time: 0.165 ms.
+I0824 19:09:04.604166  7192 data_layer.cpp:130] Transform time: 12.417 ms.
+I0824 19:09:04.838783  7192 data_layer.cpp:128] Prefetch batch: 12 ms.
+I0824 19:09:04.838798  7192 data_layer.cpp:129]      Read time: 0.156 ms.
+I0824 19:09:04.838802  7192 data_layer.cpp:130] Transform time: 12.584 ms.
+I0824 19:09:05.071568  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:09:05.071583  7192 data_layer.cpp:129]      Read time: 0.178 ms.
+I0824 19:09:05.071586  7192 data_layer.cpp:130] Transform time: 10.493 ms.
+I0824 19:09:05.303930  7192 data_layer.cpp:128] Prefetch batch: 12 ms.
+I0824 19:09:05.303946  7192 data_layer.cpp:129]      Read time: 0.161 ms.
+I0824 19:09:05.303951  7192 data_layer.cpp:130] Transform time: 12.623 ms.
+I0824 19:09:05.539659  7192 data_layer.cpp:128] Prefetch batch: 15 ms.
+I0824 19:09:05.539676  7192 data_layer.cpp:129]      Read time: 0.158 ms.
+I0824 19:09:05.539680  7192 data_layer.cpp:130] Transform time: 14.672 ms.
+I0824 19:09:05.770644  7192 data_layer.cpp:128] Prefetch batch: 12 ms.
+I0824 19:09:05.770675  7192 data_layer.cpp:129]      Read time: 0.149 ms.
+I0824 19:09:05.770678  7192 data_layer.cpp:130] Transform time: 12.315 ms.
+I0824 19:09:06.000519  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:09:06.000535  7192 data_layer.cpp:129]      Read time: 0.15 ms.
+I0824 19:09:06.000537  7192 data_layer.cpp:130] Transform time: 9.778 ms.
+I0824 19:09:06.225222  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:09:06.225239  7192 data_layer.cpp:129]      Read time: 0.153 ms.
+I0824 19:09:06.225242  7192 data_layer.cpp:130] Transform time: 9.79 ms.
+I0824 19:09:06.449280  7192 data_layer.cpp:128] Prefetch batch: 7 ms.
+I0824 19:09:06.449295  7192 data_layer.cpp:129]      Read time: 0.141 ms.
+I0824 19:09:06.449297  7192 data_layer.cpp:130] Transform time: 7.57 ms.
+I0824 19:09:06.675045  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:09:06.675061  7192 data_layer.cpp:129]      Read time: 0.149 ms.
+I0824 19:09:06.675065  7192 data_layer.cpp:130] Transform time: 9.794 ms.
+I0824 19:09:06.901614  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:09:06.901629  7192 data_layer.cpp:129]      Read time: 0.151 ms.
+I0824 19:09:06.901633  7192 data_layer.cpp:130] Transform time: 9.806 ms.
+I0824 19:09:07.133584  7192 data_layer.cpp:128] Prefetch batch: 12 ms.
+I0824 19:09:07.133600  7192 data_layer.cpp:129]      Read time: 0.147 ms.
+I0824 19:09:07.133604  7192 data_layer.cpp:130] Transform time: 12.487 ms.
+I0824 19:09:07.364662  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:09:07.364678  7192 data_layer.cpp:129]      Read time: 0.144 ms.
+I0824 19:09:07.364681  7192 data_layer.cpp:130] Transform time: 9.801 ms.
+I0824 19:09:07.598593  7192 data_layer.cpp:128] Prefetch batch: 15 ms.
+I0824 19:09:07.598609  7192 data_layer.cpp:129]      Read time: 0.151 ms.
+I0824 19:09:07.598613  7192 data_layer.cpp:130] Transform time: 15.135 ms.
+I0824 19:09:07.822672  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:09:07.822688  7192 data_layer.cpp:129]      Read time: 0.143 ms.
+I0824 19:09:07.822691  7192 data_layer.cpp:130] Transform time: 9.864 ms.
+I0824 19:09:08.046496  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:09:08.046512  7192 data_layer.cpp:129]      Read time: 0.152 ms.
+I0824 19:09:08.046516  7192 data_layer.cpp:130] Transform time: 9.815 ms.
+I0824 19:09:08.261118  7187 solver.cpp:218] Iteration 200 (4.35834 iter/s, 45.889s/200 iters), loss = 2.30265
+I0824 19:09:08.261142  7187 solver.cpp:237]     Train net output #0: loss = 2.30265 (* 1 = 2.30265 loss)
+I0824 19:09:08.261152  7187 sgd_solver.cpp:105] Iteration 200, lr = 0.001
+I0824 19:09:08.278466  7192 data_layer.cpp:128] Prefetch batch: 14 ms.
+I0824 19:09:08.278476  7192 data_layer.cpp:129]      Read time: 0.151 ms.
+I0824 19:09:08.278479  7192 data_layer.cpp:130] Transform time: 14.492 ms.
+I0824 19:09:08.501515  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:09:08.501526  7192 data_layer.cpp:129]      Read time: 0.145 ms.
+I0824 19:09:08.501529  7192 data_layer.cpp:130] Transform time: 9.864 ms.
+I0824 19:09:08.726493  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:09:08.726507  7192 data_layer.cpp:129]      Read time: 0.142 ms.
+I0824 19:09:08.726511  7192 data_layer.cpp:130] Transform time: 9.812 ms.
+I0824 19:09:08.952077  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:09:08.952090  7192 data_layer.cpp:129]      Read time: 0.145 ms.
+I0824 19:09:08.952092  7192 data_layer.cpp:130] Transform time: 9.752 ms.
+I0824 19:09:09.178347  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:09:09.178364  7192 data_layer.cpp:129]      Read time: 0.151 ms.
+I0824 19:09:09.178367  7192 data_layer.cpp:130] Transform time: 9.822 ms.
+I0824 19:09:09.403409  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:09:09.403420  7192 data_layer.cpp:129]      Read time: 0.149 ms.
+I0824 19:09:09.403424  7192 data_layer.cpp:130] Transform time: 9.826 ms.
+I0824 19:09:09.633512  7192 data_layer.cpp:128] Prefetch batch: 12 ms.
+I0824 19:09:09.633528  7192 data_layer.cpp:129]      Read time: 0.152 ms.
+I0824 19:09:09.633559  7192 data_layer.cpp:130] Transform time: 12.264 ms.
+I0824 19:09:09.856472  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:09:09.856483  7192 data_layer.cpp:129]      Read time: 0.148 ms.
+I0824 19:09:09.856487  7192 data_layer.cpp:130] Transform time: 9.857 ms.
+I0824 19:09:10.079362  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:09:10.079375  7192 data_layer.cpp:129]      Read time: 0.142 ms.
+I0824 19:09:10.079378  7192 data_layer.cpp:130] Transform time: 9.877 ms.
+I0824 19:09:10.302597  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:09:10.302613  7192 data_layer.cpp:129]      Read time: 0.154 ms.
+I0824 19:09:10.302618  7192 data_layer.cpp:130] Transform time: 9.856 ms.
+I0824 19:09:10.525703  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:09:10.525715  7192 data_layer.cpp:129]      Read time: 0.142 ms.
+I0824 19:09:10.525718  7192 data_layer.cpp:130] Transform time: 9.884 ms.
+I0824 19:09:10.748656  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:09:10.748672  7192 data_layer.cpp:129]      Read time: 0.151 ms.
+I0824 19:09:10.748674  7192 data_layer.cpp:130] Transform time: 9.775 ms.
+I0824 19:09:10.973103  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:09:10.973114  7192 data_layer.cpp:129]      Read time: 0.144 ms.
+I0824 19:09:10.973117  7192 data_layer.cpp:130] Transform time: 9.761 ms.
+I0824 19:09:11.198297  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:09:11.198312  7192 data_layer.cpp:129]      Read time: 0.139 ms.
+I0824 19:09:11.198314  7192 data_layer.cpp:130] Transform time: 9.82 ms.
+I0824 19:09:11.423912  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:09:11.423926  7192 data_layer.cpp:129]      Read time: 0.153 ms.
+I0824 19:09:11.423929  7192 data_layer.cpp:130] Transform time: 9.855 ms.
+I0824 19:09:11.650835  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:09:11.650851  7192 data_layer.cpp:129]      Read time: 0.155 ms.
+I0824 19:09:11.650854  7192 data_layer.cpp:130] Transform time: 9.793 ms.
+I0824 19:09:11.877048  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:09:11.877063  7192 data_layer.cpp:129]      Read time: 0.146 ms.
+I0824 19:09:11.877068  7192 data_layer.cpp:130] Transform time: 9.836 ms.
+I0824 19:09:12.103600  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:09:12.103615  7192 data_layer.cpp:129]      Read time: 0.142 ms.
+I0824 19:09:12.103618  7192 data_layer.cpp:130] Transform time: 9.8 ms.
+I0824 19:09:12.329670  7192 data_layer.cpp:128] Prefetch batch: 10 ms.
+I0824 19:09:12.329686  7192 data_layer.cpp:129]      Read time: 0.147 ms.
+I0824 19:09:12.329689  7192 data_layer.cpp:130] Transform time: 9.733 ms.
+I0824 19:09:12.511541  7192 data_layer.cpp:128] Prefetch batch: 7 ms.
+I0824 19:09:12.511569  7192 data_layer.cpp:129]      Read time: 0.266 ms.
+I0824 19:09:12.511575  7192 data_layer.cpp:130] Transform time: 6.226 ms.
+I0824 19:09:12.616830  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:09:12.616847  7192 data_layer.cpp:129]      Read time: 0.143 ms.
+I0824 19:09:12.616850  7192 data_layer.cpp:130] Transform time: 2.988 ms.
+I0824 19:09:12.724097  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:09:12.724107  7192 data_layer.cpp:129]      Read time: 0.143 ms.
+I0824 19:09:12.724109  7192 data_layer.cpp:130] Transform time: 3.049 ms.
+I0824 19:09:12.831392  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:09:12.831400  7192 data_layer.cpp:129]      Read time: 0.134 ms.
+I0824 19:09:12.831403  7192 data_layer.cpp:130] Transform time: 3.024 ms.
+I0824 19:09:12.938824  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:09:12.938835  7192 data_layer.cpp:129]      Read time: 0.149 ms.
+I0824 19:09:12.938838  7192 data_layer.cpp:130] Transform time: 3.144 ms.
+I0824 19:09:13.046762  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:09:13.046777  7192 data_layer.cpp:129]      Read time: 0.156 ms.
+I0824 19:09:13.046780  7192 data_layer.cpp:130] Transform time: 3.196 ms.
+I0824 19:09:13.155498  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:09:13.155527  7192 data_layer.cpp:129]      Read time: 0.155 ms.
+I0824 19:09:13.155531  7192 data_layer.cpp:130] Transform time: 3.073 ms.
+I0824 19:09:13.265091  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:09:13.265105  7192 data_layer.cpp:129]      Read time: 0.147 ms.
+I0824 19:09:13.265110  7192 data_layer.cpp:130] Transform time: 3.021 ms.
+I0824 19:09:13.373478  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:09:13.373492  7192 data_layer.cpp:129]      Read time: 0.136 ms.
+I0824 19:09:13.373495  7192 data_layer.cpp:130] Transform time: 3.034 ms.
+I0824 19:09:13.480815  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:09:13.480825  7192 data_layer.cpp:129]      Read time: 0.151 ms.
+I0824 19:09:13.480829  7192 data_layer.cpp:130] Transform time: 2.95 ms.
+I0824 19:09:13.590849  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:09:13.590863  7192 data_layer.cpp:129]      Read time: 0.149 ms.
+I0824 19:09:13.590867  7192 data_layer.cpp:130] Transform time: 3.007 ms.
+I0824 19:09:13.700140  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:09:13.700155  7192 data_layer.cpp:129]      Read time: 0.15 ms.
+I0824 19:09:13.700157  7192 data_layer.cpp:130] Transform time: 3.006 ms.
+I0824 19:09:13.809654  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:09:13.809669  7192 data_layer.cpp:129]      Read time: 0.173 ms.
+I0824 19:09:13.809672  7192 data_layer.cpp:130] Transform time: 3.034 ms.
+I0824 19:09:13.918458  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:09:13.918593  7192 data_layer.cpp:129]      Read time: 0.151 ms.
+I0824 19:09:13.918601  7192 data_layer.cpp:130] Transform time: 3.073 ms.
+I0824 19:09:14.027101  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:09:14.027114  7192 data_layer.cpp:129]      Read time: 0.145 ms.
+I0824 19:09:14.027117  7192 data_layer.cpp:130] Transform time: 3.068 ms.
+I0824 19:09:14.136698  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:09:14.136711  7192 data_layer.cpp:129]      Read time: 0.152 ms.
+I0824 19:09:14.136715  7192 data_layer.cpp:130] Transform time: 3.042 ms.
+I0824 19:09:14.245456  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:09:14.245471  7192 data_layer.cpp:129]      Read time: 0.159 ms.
+I0824 19:09:14.245474  7192 data_layer.cpp:130] Transform time: 3.024 ms.
+I0824 19:09:14.354598  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:09:14.354611  7192 data_layer.cpp:129]      Read time: 0.155 ms.
+I0824 19:09:14.354614  7192 data_layer.cpp:130] Transform time: 3.091 ms.
+I0824 19:09:14.463563  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:09:14.463579  7192 data_layer.cpp:129]      Read time: 0.156 ms.
+I0824 19:09:14.463583  7192 data_layer.cpp:130] Transform time: 3.119 ms.
+I0824 19:09:14.572491  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:09:14.572506  7192 data_layer.cpp:129]      Read time: 0.15 ms.
+I0824 19:09:14.572510  7192 data_layer.cpp:130] Transform time: 3.054 ms.
+I0824 19:09:14.681540  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:09:14.681557  7192 data_layer.cpp:129]      Read time: 0.149 ms.
+I0824 19:09:14.681560  7192 data_layer.cpp:130] Transform time: 3.026 ms.
+I0824 19:09:14.790369  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:09:14.790383  7192 data_layer.cpp:129]      Read time: 0.153 ms.
+I0824 19:09:14.790387  7192 data_layer.cpp:130] Transform time: 3.033 ms.
+I0824 19:09:14.899020  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:09:14.899034  7192 data_layer.cpp:129]      Read time: 0.162 ms.
+I0824 19:09:14.899036  7192 data_layer.cpp:130] Transform time: 3.03 ms.
+I0824 19:09:15.008579  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:09:15.008592  7192 data_layer.cpp:129]      Read time: 0.141 ms.
+I0824 19:09:15.008595  7192 data_layer.cpp:130] Transform time: 3.022 ms.
+I0824 19:09:15.117475  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:09:15.117491  7192 data_layer.cpp:129]      Read time: 0.171 ms.
+I0824 19:09:15.117494  7192 data_layer.cpp:130] Transform time: 3.106 ms.
+I0824 19:09:15.226375  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:09:15.226390  7192 data_layer.cpp:129]      Read time: 0.167 ms.
+I0824 19:09:15.226394  7192 data_layer.cpp:130] Transform time: 3.025 ms.
+I0824 19:09:15.335306  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:09:15.335320  7192 data_layer.cpp:129]      Read time: 0.15 ms.
+I0824 19:09:15.335325  7192 data_layer.cpp:130] Transform time: 3.072 ms.
+I0824 19:09:15.444989  7192 data_layer.cpp:128] Prefetch batch: 3 ms.
+I0824 19:09:15.445005  7192 data_layer.cpp:129]      Read time: 0.151 ms.
+I0824 19:09:15.445008  7192 data_layer.cpp:130] Transform time: 3.024 ms.

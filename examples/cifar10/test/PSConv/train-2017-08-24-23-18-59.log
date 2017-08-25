@@ -1,0 +1,14 @@
+I0824 23:18:59.582417  8607 caffe.cpp:218] Using GPUs 0
+I0824 23:18:59.583413  8607 caffe.cpp:223] GPU 0: À—1Àü
+F0824 23:18:59.583431  8607 common.cpp:152] Check failed: error == cudaSuccess (30 vs. 0)  unknown error
+*** Check failure stack trace: ***
+    @     0x7f7aeb8565cd  google::LogMessage::Fail()
+    @     0x7f7aeb858433  google::LogMessage::SendToLog()
+    @     0x7f7aeb85615b  google::LogMessage::Flush()
+    @     0x7f7aeb858e1e  google::LogMessageFatal::~LogMessageFatal()
+    @     0x7f7aec1a92f2  caffe::Caffe::SetDevice()
+    @           0x41c918  train()
+    @           0x41ef31  main
+    @     0x7f7ae9fe3830  __libc_start_main
+    @           0x41b4b9  _start
+    @              (nil)  (unknown)
