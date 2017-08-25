@@ -412,7 +412,7 @@ CXXFLAGS += -MMD -MP
 # Complete build flags.
 COMMON_FLAGS += $(foreach includedir,$(INCLUDE_DIRS),-I$(includedir))
 CXXFLAGS += -pthread -fPIC $(COMMON_FLAGS) $(WARNINGS)
-NVCCFLAGS += -ccbin=$(CXX) -Xcompiler -fPIC $(COMMON_FLAGS)
+NVCCFLAGS += -D_FORCE_INLINES -ccbin=$(CXX) -Xcompiler -fPIC $(COMMON_FLAGS)
 # mex may invoke an older gcc that is too liberal with -Wuninitalized
 MATLAB_CXXFLAGS := $(CXXFLAGS) -Wno-uninitialized
 LINKFLAGS += -pthread -fPIC $(COMMON_FLAGS) $(WARNINGS)
@@ -532,6 +532,10 @@ runtest: $(TEST_ALL_BIN)
 	$(TOOL_BUILD_DIR)/caffe
 	$(TEST_ALL_BIN) $(TEST_GPUID) --gtest_shuffle $(TEST_FILTER)
 
+TEST_PS_BIN = .build_debug/test/test_convolution_layer.testbin
+runtest_ps: $(TEST_ALL_BIN) $(TEST_PS_BIN)
+	$(TOOL_BUILD_DIR)/caffe
+	$(TEST_PS_BIN) $(TEST_GPUID) --gtest_shuffle $(TEST_FILTER)
 pytest: py
 	cd python; python -m unittest discover -s caffe/test
 

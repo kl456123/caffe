@@ -1,0 +1,305 @@
+name: "PSConvLeNet"
+layer {
+name: "mnist"
+          type: "Data"
+          top: "data"
+          top: "label"
+          include {
+phase: TRAIN
+          }
+      transform_param {
+scale: 0.00390625
+      }
+      data_param {
+source: "/home/jinshan/caffe/examples/mnist/mnist_train_lmdb"
+            batch_size: 64
+            backend: LMDB
+      }
+}
+layer {
+name: "mnist"
+          type: "Data"
+          top: "data"
+          top: "label"
+          include {
+phase: TEST
+          }
+      transform_param {
+scale: 0.00390625
+      }
+      data_param {
+source: "/home/jinshan/caffe/examples/mnist/mnist_test_lmdb"
+            batch_size: 100
+            backend: LMDB
+      }
+}
+layer {
+name: "conv1"
+          type: "Convolution"
+          bottom: "data"
+          top: "conv1"
+          param {
+lr_mult: 1
+          }
+      param {
+lr_mult: 2
+      }
+      convolution_param {
+num_output: 90
+                pad:1
+                kernel_size: 3
+                stride: 1
+                weight_filler {
+type: "xavier"
+                }
+            bias_filler {
+type: "constant"
+            }
+      }
+}
+
+#layer{
+#name:"bn1"
+#         bottom:"conv1"
+#         top:"conv1"
+#         type:"BatchNorm"
+#}
+#
+#layer{
+#name:"scale1"
+#         bottom:"conv1"
+#         top:"conv1"
+#         type:"Scale"
+#         scale_param:{
+#bias_term:true
+#         }
+#}
+
+layer{
+name:"relu1"
+         bottom:"conv1"
+         top:"conv1"
+         type:"ReLU"
+
+}
+layer{
+name:"pool1"
+         bottom:"conv1"
+         top:"pool1"
+         type:"Pooling"
+         pooling_param{
+pool:MAX
+         kernel_size:2
+         stride:2
+         }
+}
+###################################
+########psconv block begin#########
+###################################
+
+layer{
+name: "conv2"
+          type: "Convolution"
+          bottom: "pool1"
+          top: "conv2"
+          param {
+lr_mult: 1
+          }
+      param {
+lr_mult: 2
+      }
+      convolution_param {
+dilation:2
+#position_sensetive:true
+#engine:CAFFE
+#ps_group:9
+             num_output: 180
+             kernel_size: 3
+             pad:2
+             stride: 1
+             weight_filler {
+type: "xavier"
+             }
+         bias_filler {
+type: "constant"
+         }
+      }
+}
+#layer{
+#name:"bn2"
+#         bottom:"conv2"
+#         top:"conv2"
+#         type:"BatchNorm"
+#}
+#
+#layer{
+#name:"scale2"
+#         bottom:"conv2"
+#         top:"conv2"
+#         type:"Scale"
+#         scale_param:{
+#bias_term:true
+#         }
+#}
+
+layer{
+name:"relu2"
+         bottom:"conv2"
+         top:"conv2"
+         type:"ReLU"
+
+}
+layer{
+name:"conv3"
+         bottom:"conv2"
+         top:"conv3"
+         type:"Convolution"
+         param{
+lr_mult:1}
+     param{
+lr_mult:2}
+     convolution_param{
+#position_sensetive:true
+#                       ps_group:9
+#                       engine:CAFFE
+num_output:360
+               kernel_size:3
+               pad:1
+               stride:1
+               weight_filler{
+type:"xavier"
+               }
+           bias_filler{
+type:"constant"
+           }
+     }
+}
+layer{
+name:"relu3"
+         type:"ReLU"
+         bottom:"conv3"
+         top:"conv3"
+}
+
+layer{
+name:"conv4"
+         bottom:"conv3"
+         top:"conv4"
+         type:"Convolution"
+         param{
+lr_mult:1}
+     param{
+lr_mult:2}
+     convolution_param{
+#position_sensetive:true
+#                       ps_group:4
+#                       engine:CAFFE
+num_output:360
+               kernel_size:2
+               pad:0
+               stride:2
+               weight_filler{
+type:"xavier"
+               }
+           bias_filler{
+type:"constant"
+           }
+     }
+}
+layer{
+name:"relu4"
+         type:"ReLU"
+         bottom:"conv4"
+         top:"conv4"
+}
+###################################
+########psconv block end###########
+###################################
+#layer {
+#name: "conv4"
+#          type: "Convolution"
+#          bottom: "conv2"
+#          top: "conv4"
+#          param {
+#lr_mult: 1
+#          }
+#      param {
+#lr_mult: 2
+#      }
+#      convolution_param {
+#num_output: 10
+#                pad:1
+#                kernel_size: 3
+#                stride: 1
+#                weight_filler {
+#type: "xavier"
+#                }
+#            bias_filler {
+#type: "constant"
+#            }
+#      }
+#}
+
+layer{
+name:"conv5"
+         bottom:"conv4"
+         top:"conv5"
+         type:"Convolution"
+         param{
+lr_mult:1}
+     param{
+lr_mult:2}
+     convolution_param{
+dilation:2
+#             position_sensetive:true
+#             ps_group:4
+#             engine:CAFFE
+             num_output:10
+             kernel_size:2
+             pad:0
+             stride:1
+             weight_filler{
+type:"xavier"
+             }
+         bias_filler{
+type:"constant"
+         }
+     }
+}
+layer{
+name:"relu5"
+         type:"ReLU"
+         bottom:"conv5"
+         top:"conv5"
+}
+
+#################################
+#########average pooling#########
+#################################
+layer{
+name:"pool"
+         bottom:"conv5"
+         top:"pool"
+         type:"Pooling"
+         pooling_param{
+pool:AVE
+         global_pooling:true
+         }
+}
+layer {
+name: "accuracy"
+          type: "Accuracy"
+          bottom: "pool"
+          bottom: "label"
+          top: "accuracy"
+          include {
+phase: TEST
+          }
+}
+layer {
+name: "loss"
+          type: "SoftmaxWithLoss"
+          bottom: "pool"
+          bottom: "label"
+          top: "loss"
+}
