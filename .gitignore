@@ -101,3 +101,5 @@ MANIFEST-*
 *.log
 *.train
 *.test
+examples/cifar10/*.png
+examples/mnist/*.png
