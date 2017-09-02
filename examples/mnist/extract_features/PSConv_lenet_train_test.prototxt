@@ -11,7 +11,7 @@ phase: TRAIN
 scale: 0.00390625
       }
       data_param {
-source: "/home/jinshan/caffe/examples/mnist/mnist_train_lmdb"
+source: "/home/z/mycaffe/examples/mnist/mnist_train_lmdb"
             batch_size: 64
             backend: LMDB
       }
@@ -28,7 +28,7 @@ phase: TEST
 scale: 0.00390625
       }
       data_param {
-source: "/home/jinshan/caffe/examples/mnist/mnist_test_lmdb"
+source: "/home/z/mycaffe/examples/mnist/mnist_test_lmdb"
             batch_size: 100
             backend: LMDB
       }
@@ -45,7 +45,7 @@ lr_mult: 1
 lr_mult: 2
       }
       convolution_param {
-num_output: 90
+num_output: 80
                 pad:1
                 kernel_size: 3
                 stride: 1
@@ -83,16 +83,50 @@ name:"relu1"
 
 }
 layer{
-name:"pool1"
-         bottom:"conv1"
-         top:"pool1"
-         type:"Pooling"
-         pooling_param{
-pool:MAX
-         kernel_size:2
-         stride:2
+name: "pool1"
+          type: "Convolution"
+          bottom: "conv1"
+          top: "pool1"
+          param {
+lr_mult: 1
+          }
+      param {
+lr_mult: 2
+      }
+      convolution_param {
+             position_sensetive:true
+             engine:CAFFE
+             ps_group:4
+             num_output: 90
+             kernel_size: 2
+             pad:0
+             stride: 2
+             weight_filler {
+type: "xavier"
+             }
+         bias_filler {
+type: "constant"
          }
+      }
 }
+layer{
+name:"poolrelu1"
+         bottom:"pool1"
+         top:"pool1"
+         type:"ReLU"
+
+}
+#layer{
+#name:"pool1"
+#         bottom:"conv1"
+#         top:"pool1"
+#         type:"Pooling"
+#         pooling_param{
+#pool:MAX
+#         kernel_size:2
+#         stride:2
+#         }
+#}
 ###################################
 ########psconv block begin#########
 ###################################
@@ -191,6 +225,7 @@ lr_mult:1}
      param{
 lr_mult:2}
      convolution_param{
+         dilation:2
 position_sensetive:true
                        ps_group:4
                        engine:CAFFE
@@ -255,8 +290,8 @@ dilation:2
              ps_group:4
              engine:CAFFE
              num_output:10
-             kernel_size:2
-             pad:0
+             kernel_size:3
+             pad:1
              stride:1
              weight_filler{
 type:"xavier"

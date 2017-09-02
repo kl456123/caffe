@@ -1,7 +1,7 @@
 #!/bin/bash
 
 LOG=Conv/train-`date +%Y-%m-%d-%H-%M-%S`.log
-CAFFE=~/caffe/build/tools/caffe
+CAFFE=~/mycaffe/build/tools/caffe
 
-$CAFFE train --solver=./Conv_cifar10_quick_solver.prototxt 2>&1 | tee $LOG
+$CAFFE train --solver=./Conv_cifar10_quick_solver.prototxt --gpu 0,1 2>&1 | tee $LOG
 
